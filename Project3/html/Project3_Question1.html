@@ -1,0 +1,288 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Project3_Question1.m</title><meta name="generator" content="MATLAB 9.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-10-22"><meta name="DC.source" content="Project3_Question1.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Project3_Question1.m</h1><!--introduction--><pre>code to see results from Project 3, Question 1
+code to run EM algorithm is attached as a MATLAB function</pre><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Generate fake data to test algorithm, based on generative model</a></li><li><a href="#2">Simulated Data Results</a></li><li><a href="#3">Test on data provided for HW, problems 1-C and 1-D</a></li><li><a href="#4">Actual Data Results</a></li><li><a href="#5">Re-run EM with initializations for lambda-D and lambda-C swapped, 1-E</a></li></ul></div><h2 id="1">Generate fake data to test algorithm, based on generative model</h2><pre class="codeinput">piParam = 0.3; <span class="comment">% for Bernoulli distribution</span>
+lambdaD = 5; <span class="comment">% lambda for dangerous intersections</span>
+lambdaC = 1; <span class="comment">% lambda for calm intersections</span>
+N = 100;
+X = zeros(N,1); <span class="comment">% 1000 data points</span>
+Z = zeros(N,1);
+<span class="keyword">for</span> ii=1:N
+    Z(ii) = binornd(1,piParam); <span class="comment">% latent variable</span>
+    <span class="keyword">if</span> Z(ii)==1
+        X(ii) = poissrnd(lambdaD); <span class="comment">% generate fake observed accident count</span>
+                       <span class="comment">% for dangerous intersections</span>
+    <span class="keyword">elseif</span> Z(ii)==0
+        X(ii) = poissrnd(lambdaC); <span class="comment">% generate fake observed accidents for calm</span>
+                       <span class="comment">% intersections</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+figure;
+gscatter(1:N,X,Z);title(<span class="string">'Simulated Intersection Data'</span>);
+xlabel(<span class="string">'Intersection ID'</span>);ylabel(<span class="string">'Accidents/Year'</span>);
+legend(<span class="string">'Calm'</span>,<span class="string">'Dangerous'</span>);
+
+[piParamEst,lambdaDest,lambdaCest] = PoissBernEM(X);
+
+<span class="comment">% compare estimated values to true values from simulation</span>
+fprintf(<span class="string">'True Pi: %3.2f    Estimated Pi: %3.2f\n'</span>,piParam,piParamEst);
+fprintf(<span class="string">'True Lambda-D: %3.2f    Estimated Lambda-D: %3.2f\n'</span>,lambdaD,lambdaDest);
+fprintf(<span class="string">'True Lambda-C: %3.2f    Estimated Lambda-C: %3.2f\n\n'</span>,lambdaC,lambdaCest);
+
+<span class="comment">% Figure out how well we do inferring dangerous versus calm intersections</span>
+<span class="comment">%  Count any intersection as dangerous if alpha for that intersection is</span>
+<span class="comment">%  greater than 0.5.</span>
+tmp = poisspdf(X,lambdaDest)*piParamEst;
+tmp2 = poisspdf(X,lambdaCest)*(1-piParamEst);
+alpha = tmp./(tmp+tmp2); <span class="comment">% calculate alpha</span>
+
+estimatedIntersectionType = alpha&gt;0.5; <span class="comment">% create logical indicator, 1 is dangerous</span>
+
+tmp = estimatedIntersectionType+Z;
+proportionCorrect = sum(tmp==2 | tmp==0)/N;
+
+fprintf(<span class="string">'Proportion of Intersections Correctly Identified: %3.2f\n\n'</span>,proportionCorrect);
+</pre><pre class="codeoutput">True Pi: 0.30    Estimated Pi: 0.26
+True Lambda-D: 5.00    Estimated Lambda-D: 4.41
+True Lambda-C: 1.00    Estimated Lambda-C: 0.93
+
+Proportion of Intersections Correctly Identified: 0.90
+
+</pre><img vspace="5" hspace="5" src="Project3_Question1_01.png" alt=""> <h2 id="2">Simulated Data Results</h2><p>It looks like the algorithm works quite well, as it estimates the parameters of the model accurately and correctly identifies about 90% of intersections as dangerous or calm.</p><h2 id="3">Test on data provided for HW, problems 1-C and 1-D</h2><pre class="codeinput">X = [2,0,0,1,3,0,1,6,2,0,1,0,2,0,8,0,1,3,2,0];
+N = length(X);
+[piParam,lambdaD,lambdaC] = PoissBernEM(X);
+
+<span class="comment">% print estimated values</span>
+fprintf(<span class="string">'Estimated Pi (Probability Dangerous): %3.2f\n'</span>,piParam);
+fprintf(<span class="string">'Estimated Lambda-D: %3.2f\n'</span>,lambdaD);
+fprintf(<span class="string">'Estimated Lambda-C: %3.2f\n'</span>,lambdaC);
+
+<span class="comment">% Calculate probability of an intersection being dangerous given the data,</span>
+<span class="comment">%  which we can find by calculating alpha.</span>
+tmp = poisspdf(X,lambdaD)*piParam;
+tmp2 = poisspdf(X,lambdaC)*(1-piParam);
+alpha = tmp./(tmp+tmp2); <span class="comment">% calculate alpha</span>
+
+fprintf(<span class="string">'Intersection  Probability Dangerous\n'</span>);
+disp([(1:N)',alpha']);
+</pre><pre class="codeoutput">Estimated Pi (Probability Dangerous): 0.12
+Estimated Lambda-D: 6.12
+Estimated Lambda-C: 0.96
+Intersection  Probability Dangerous
+    1.0000    0.0323
+    2.0000    0.0008
+    3.0000    0.0008
+    4.0000    0.0052
+    5.0000    0.1755
+    6.0000    0.0008
+    7.0000    0.0052
+    8.0000    0.9822
+    9.0000    0.0323
+   10.0000    0.0008
+   11.0000    0.0052
+   12.0000    0.0008
+   13.0000    0.0323
+   14.0000    0.0008
+   15.0000    0.9996
+   16.0000    0.0008
+   17.0000    0.0052
+   18.0000    0.1755
+   19.0000    0.0323
+   20.0000    0.0008
+
+</pre><h2 id="4">Actual Data Results</h2><p>So, we have an ~12% probability of an intersection being dangerous. Dangerous intersections have about 6 accidents/year, while calm intersections have about 1 accident/year.</p><p>The probability that intersection 1 is dangerous is 0.032, while the probability that intersection 5 is dangerous is 0.176.</p><p>Based on the probabilities, it would be reasonable (cautious) to tag any intersection with a probability of being dangerous greater than 0.05 as black spots. So, we would tag intersections 5, 8, 15, and 18 as potentially dangerous intersections.</p><pre class="codeinput">dangerous = alpha&gt;0.05;
+figure;
+gscatter(1:N,X,dangerous);title(<span class="string">'Dangerous/Calm Intersections'</span>);
+xlabel(<span class="string">'Intersection ID'</span>);ylabel(<span class="string">'Accidents/Year'</span>);
+legend(<span class="string">'Calm'</span>,<span class="string">'Dangerous'</span>);
+</pre><img vspace="5" hspace="5" src="Project3_Question1_02.png" alt=""> <h2 id="5">Re-run EM with initializations for lambda-D and lambda-C swapped, 1-E</h2><pre class="codeinput">X = [2,0,0,1,3,0,1,6,2,0,1,0,2,0,8,0,1,3,2,0];
+N = length(X);
+[piParam,lambdaD,lambdaC] = PoissBernEMSwap(X);
+
+<span class="comment">% print estimated values</span>
+fprintf(<span class="string">'Estimated Pi: %3.2f\n'</span>,piParam);
+fprintf(<span class="string">'Estimated Lambda-D: %3.2f\n'</span>,lambdaD);
+fprintf(<span class="string">'Estimated Lambda-C: %3.2f\n'</span>,lambdaC);
+
+<span class="comment">% We see that swapping the initializations gives us complementary estimates.</span>
+<span class="comment">%  We have now estimated, in essence, the probability that an intersection</span>
+<span class="comment">%  is calm. As long as we flip our labels, these are still good inferences.</span>
+</pre><pre class="codeoutput">Estimated Pi: 0.88
+Estimated Lambda-D: 0.96
+Estimated Lambda-C: 6.12
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Project3_Question1.m
+%  code to see results from Project 3, Question 1
+%  code to run EM algorithm is attached as a MATLAB function
+
+%% Generate fake data to test algorithm, based on generative model
+piParam = 0.3; % for Bernoulli distribution
+lambdaD = 5; % lambda for dangerous intersections
+lambdaC = 1; % lambda for calm intersections
+N = 100;
+X = zeros(N,1); % 1000 data points
+Z = zeros(N,1);
+for ii=1:N
+    Z(ii) = binornd(1,piParam); % latent variable
+    if Z(ii)==1
+        X(ii) = poissrnd(lambdaD); % generate fake observed accident count 
+                       % for dangerous intersections
+    elseif Z(ii)==0
+        X(ii) = poissrnd(lambdaC); % generate fake observed accidents for calm
+                       % intersections
+    end
+end
+
+figure;
+gscatter(1:N,X,Z);title('Simulated Intersection Data');
+xlabel('Intersection ID');ylabel('Accidents/Year');
+legend('Calm','Dangerous');
+
+[piParamEst,lambdaDest,lambdaCest] = PoissBernEM(X);
+
+% compare estimated values to true values from simulation
+fprintf('True Pi: %3.2f    Estimated Pi: %3.2f\n',piParam,piParamEst);
+fprintf('True Lambda-D: %3.2f    Estimated Lambda-D: %3.2f\n',lambdaD,lambdaDest);
+fprintf('True Lambda-C: %3.2f    Estimated Lambda-C: %3.2f\n\n',lambdaC,lambdaCest);
+
+% Figure out how well we do inferring dangerous versus calm intersections
+%  Count any intersection as dangerous if alpha for that intersection is
+%  greater than 0.5.
+tmp = poisspdf(X,lambdaDest)*piParamEst;
+tmp2 = poisspdf(X,lambdaCest)*(1-piParamEst);
+alpha = tmp./(tmp+tmp2); % calculate alpha
+
+estimatedIntersectionType = alpha>0.5; % create logical indicator, 1 is dangerous
+
+tmp = estimatedIntersectionType+Z;
+proportionCorrect = sum(tmp==2 | tmp==0)/N;
+
+fprintf('Proportion of Intersections Correctly Identified: %3.2f\n\n',proportionCorrect);
+
+%% Simulated Data Results
+% It looks like the algorithm works quite well, as it estimates the
+% parameters of the model accurately and correctly identifies about
+% 90% of intersections as dangerous or calm.
+
+%% Test on data provided for HW, problems 1-C and 1-D
+X = [2,0,0,1,3,0,1,6,2,0,1,0,2,0,8,0,1,3,2,0];
+N = length(X);
+[piParam,lambdaD,lambdaC] = PoissBernEM(X);
+
+% print estimated values
+fprintf('Estimated Pi (Probability Dangerous): %3.2f\n',piParam);
+fprintf('Estimated Lambda-D: %3.2f\n',lambdaD);
+fprintf('Estimated Lambda-C: %3.2f\n',lambdaC);
+
+% Calculate probability of an intersection being dangerous given the data,
+%  which we can find by calculating alpha.
+tmp = poisspdf(X,lambdaD)*piParam;
+tmp2 = poisspdf(X,lambdaC)*(1-piParam);
+alpha = tmp./(tmp+tmp2); % calculate alpha
+
+fprintf('Intersection  Probability Dangerous\n');
+disp([(1:N)',alpha']);
+
+%% Actual Data Results
+% So, we have an ~12% probability of an intersection being dangerous.
+% Dangerous intersections have about 6 accidents/year, while calm
+% intersections have about 1 accident/year.
+%
+% The probability that intersection 1 is dangerous is 0.032, while the
+% probability that intersection 5 is dangerous is 0.176.
+%
+% Based on the probabilities, it would be reasonable (cautious) to tag any
+% intersection with a probability of being dangerous greater than 0.05 as
+% black spots. So, we would tag intersections 5, 8, 15, and 18 as
+% potentially dangerous intersections.
+
+dangerous = alpha>0.05;
+figure;
+gscatter(1:N,X,dangerous);title('Dangerous/Calm Intersections');
+xlabel('Intersection ID');ylabel('Accidents/Year');
+legend('Calm','Dangerous');
+
+%% Re-run EM with initializations for lambda-D and lambda-C swapped, 1-E
+X = [2,0,0,1,3,0,1,6,2,0,1,0,2,0,8,0,1,3,2,0];
+N = length(X);
+[piParam,lambdaD,lambdaC] = PoissBernEMSwap(X);
+
+% print estimated values
+fprintf('Estimated Pi: %3.2f\n',piParam);
+fprintf('Estimated Lambda-D: %3.2f\n',lambdaD);
+fprintf('Estimated Lambda-C: %3.2f\n',lambdaC);
+
+% We see that swapping the initializations gives us complementary estimates.
+%  We have now estimated, in essence, the probability that an intersection
+%  is calm. As long as we flip our labels, these are still good inferences.
+
+##### SOURCE END #####
+--></body></html>

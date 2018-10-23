@@ -1,0 +1,330 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>RegressionProblem</title><meta name="generator" content="MATLAB 9.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-10-10"><meta name="DC.source" content="RegressionProblem.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Project 2, Question 2</a></li><li><a href="#3">2-a , load data, create Vandermonde design matrix, build tableau</a></li><li><a href="#4">2-b , test SWEEP operator, the function SWEEP is attached separately</a></li><li><a href="#5">2-c , iteratively run regression, make plots</a></li><li><a href="#6">2-d , solve constrained least-squares problem</a></li></ul></div><pre class="codeinput"><span class="comment">% RegressionProblem.m</span>
+</pre><h2 id="2">Project 2, Question 2</h2><pre>code to use sweep operator to perform linear regression</pre><h2 id="3">2-a , load data, create Vandermonde design matrix, build tableau</h2><pre class="codeinput">x = [-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3]';
+y = [-17,-7,0.5,3,5,4,2.5,-0.5,-2,-2,0.5,5,12]';
+
+figure;plot(x,y,<span class="string">'k*'</span>);xlabel(<span class="string">'X'</span>);ylabel(<span class="string">'Y'</span>);title(<span class="string">'Data For Polynomial Regression'</span>);
+
+X = vandermonde(x,4); <span class="comment">% get Vandermonde design</span>
+[n,p] = size(X);
+
+T = [[X'*X,X'*y];[y'*X,y'*y]]; <span class="comment">% build tableau</span>
+</pre><img vspace="5" hspace="5" src="RegressionProblem_01.png" alt=""> <h2 id="4">2-b , test SWEEP operator, the function SWEEP is attached separately</h2><pre class="codeinput"><span class="keyword">for</span> k=1:p
+    T = SWEEP(T,k);
+<span class="keyword">end</span>
+
+fprintf(<span class="string">'The last column of T after sweeping all rows\n'</span>);
+fprintf(<span class="string">'is the solution to the least-squares problem\n'</span>);
+myB = T(1:p,end)
+
+originalSSR = T(end,end); <span class="comment">% get sum of squared residuals</span>
+
+<span class="comment">% compare to MATLAB's least-squares operation</span>
+matlabB = X\y;
+fprintf(<span class="string">'This is MATLAB''s least-squares solution: \n'</span>);
+matlabB
+</pre><pre class="codeoutput">The last column of T after sweeping all rows
+is the solution to the least-squares problem
+
+myB =
+
+    1.9677
+   -4.0030
+   -0.4349
+    0.9930
+   -0.0063
+
+This is MATLAB's least-squares solution: 
+
+matlabB =
+
+    1.9677
+   -4.0030
+   -0.4349
+    0.9930
+   -0.0063
+
+</pre><h2 id="5">2-c , iteratively run regression, make plots</h2><pre class="codeinput">T = [[X'*X,X'*y];[y'*X,y'*y]]; <span class="comment">% rebuild tableau</span>
+
+figure;
+plot(x,y,<span class="string">'k*'</span>);xlabel(<span class="string">'X'</span>);ylabel(<span class="string">'Y'</span>);
+title(<span class="string">'Polynomial Regression Models'</span>);
+h = legend(<span class="string">'Data'</span>,<span class="string">'Location'</span>,<span class="string">'Southeast'</span>);
+hold <span class="string">on</span>;
+a = linspace(-3,3,1000); <span class="comment">% p was defined above</span>
+newleg = h.String;
+
+fprintf(<span class="string">'Iterative Regression: \n'</span>);
+fprintf(<span class="string">'    Coefs      SSR\n'</span>);
+<span class="keyword">for</span> k=1:p
+   T = SWEEP(T,k);
+   hornerFun = myHorner(T(1:k,p+1));
+   plot(a,hornerFun(a));
+   newleg{end+1} = sprintf(<span class="string">'%d Coef Model'</span>,k);
+   legend(newleg);
+   disp([k,T(p+1,p+1)]);
+<span class="keyword">end</span>
+
+<span class="comment">% it looks like 4 model parameters would be sufficient, which is an order 3</span>
+<span class="comment">% polynomial</span>
+</pre><pre class="codeoutput">Iterative Regression: 
+    Coefs      SSR
+    1.0000  570.7692
+
+    2.0000  349.8887
+
+    3.0000  319.7837
+
+    4.0000    2.5180
+
+    5.0000    2.4869
+
+</pre><img vspace="5" hspace="5" src="RegressionProblem_02.png" alt=""> <h2 id="6">2-d , solve constrained least-squares problem</h2><pre class="codeinput">L = [1,-2,4,-8,16;1,2,4,8,16];
+Lrows = size(L,1);
+T = [[X'*X,L',X'*y];[L,zeros(2,Lrows+1)];[y'*X,zeros(1,Lrows),y'*y]]; <span class="comment">% build tableau</span>
+
+<span class="keyword">for</span> ii=1:p+Lrows
+    T = SWEEP(T,ii);
+<span class="keyword">end</span>
+
+constrainedB = T(1:p,end);
+
+<span class="comment">% compare constrained result to original result</span>
+fprintf(<span class="string">'Coefficients Beta: \n'</span>);
+fprintf(<span class="string">'   LS        Constrained LS \n'</span>);
+disp([myB,constrainedB]);
+
+<span class="comment">% compare SSR of each result</span>
+constrainedSSR = T(end,end);
+fprintf(<span class="string">'Sum of Squared Residuals: \n'</span>);
+fprintf(<span class="string">'   LS        Constrained LS \n'</span>);
+disp([originalSSR,constrainedSSR]);
+
+<span class="comment">% compare proportion of variance explained</span>
+originalVarExp = 1-var(y-X*myB)/var(y);
+constrainedVarExp = 1-var(y-X*constrainedB)/var(y);
+fprintf(<span class="string">'Proportion of Variance Explained: \n'</span>);
+fprintf(<span class="string">'   LS        Constrained LS \n'</span>);
+disp([originalVarExp,constrainedVarExp]);
+
+<span class="comment">% check that Lbeta = 0</span>
+fprintf(<span class="string">'Check constraint on regression L*beta: \n'</span>);
+disp(L*constrainedB);
+
+<span class="comment">% make new plot</span>
+figure;
+plot(x,y,<span class="string">'k*'</span>);xlabel(<span class="string">'X'</span>);ylabel(<span class="string">'Y'</span>);
+title(<span class="string">'Polynomial Regression Models'</span>);
+h = legend(<span class="string">'Data'</span>,<span class="string">'Location'</span>,<span class="string">'Southeast'</span>);
+hold <span class="string">on</span>;
+a = linspace(-3,3,1000); <span class="comment">% p was defined above</span>
+newleg = h.String;
+hornerFun = myHorner(myB);
+plot(a,hornerFun(a));
+newleg{end+1} = <span class="string">'Least-Squares'</span>;
+legend(newleg);
+
+hornerFun = myHorner(constrainedB);
+plot(a,hornerFun(a));
+newleg{end+1} = <span class="string">'Constrained Least-Squares'</span>;
+legend(newleg);
+</pre><pre class="codeoutput">Coefficients Beta: 
+   LS        Constrained LS 
+    1.9677    2.0007
+   -4.0030   -3.9491
+   -0.4349   -0.5062
+    0.9930    0.9873
+   -0.0063    0.0015
+
+Sum of Squared Residuals: 
+   LS        Constrained LS 
+    2.4869    2.5880
+
+Proportion of Variance Explained: 
+   LS        Constrained LS 
+    0.9956    0.9955
+
+Check constraint on regression L*beta: 
+   1.0e-15 *
+
+   -0.2949
+   -0.2949
+
+</pre><img vspace="5" hspace="5" src="RegressionProblem_03.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% RegressionProblem.m
+
+%% Project 2, Question 2
+%  code to use sweep operator to perform linear regression 
+
+%% 2-a , load data, create Vandermonde design matrix, build tableau
+x = [-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3]';
+y = [-17,-7,0.5,3,5,4,2.5,-0.5,-2,-2,0.5,5,12]';
+
+figure;plot(x,y,'k*');xlabel('X');ylabel('Y');title('Data For Polynomial Regression');
+
+X = vandermonde(x,4); % get Vandermonde design
+[n,p] = size(X);
+
+T = [[X'*X,X'*y];[y'*X,y'*y]]; % build tableau
+
+%% 2-b , test SWEEP operator, the function SWEEP is attached separately
+for k=1:p
+    T = SWEEP(T,k);
+end
+
+fprintf('The last column of T after sweeping all rows\n');
+fprintf('is the solution to the least-squares problem\n');
+myB = T(1:p,end)
+
+originalSSR = T(end,end); % get sum of squared residuals
+
+% compare to MATLAB's least-squares operation
+matlabB = X\y;
+fprintf('This is MATLAB''s least-squares solution: \n');
+matlabB
+
+%% 2-c , iteratively run regression, make plots
+T = [[X'*X,X'*y];[y'*X,y'*y]]; % rebuild tableau
+
+figure;
+plot(x,y,'k*');xlabel('X');ylabel('Y');
+title('Polynomial Regression Models');
+h = legend('Data','Location','Southeast');
+hold on;
+a = linspace(-3,3,1000); % p was defined above
+newleg = h.String;
+
+fprintf('Iterative Regression: \n');
+fprintf('    Coefs      SSR\n');
+for k=1:p
+   T = SWEEP(T,k);
+   hornerFun = myHorner(T(1:k,p+1));
+   plot(a,hornerFun(a));
+   newleg{end+1} = sprintf('%d Coef Model',k);
+   legend(newleg);
+   disp([k,T(p+1,p+1)]);
+end
+
+% it looks like 4 model parameters would be sufficient, which is an order 3
+% polynomial
+
+%% 2-d , solve constrained least-squares problem
+L = [1,-2,4,-8,16;1,2,4,8,16];
+Lrows = size(L,1);
+T = [[X'*X,L',X'*y];[L,zeros(2,Lrows+1)];[y'*X,zeros(1,Lrows),y'*y]]; % build tableau
+
+for ii=1:p+Lrows
+    T = SWEEP(T,ii);
+end
+
+constrainedB = T(1:p,end);
+
+% compare constrained result to original result
+fprintf('Coefficients Beta: \n');
+fprintf('   LS        Constrained LS \n');
+disp([myB,constrainedB]);
+
+% compare SSR of each result
+constrainedSSR = T(end,end);
+fprintf('Sum of Squared Residuals: \n');
+fprintf('   LS        Constrained LS \n');
+disp([originalSSR,constrainedSSR]);
+
+% compare proportion of variance explained
+originalVarExp = 1-var(y-X*myB)/var(y);
+constrainedVarExp = 1-var(y-X*constrainedB)/var(y);
+fprintf('Proportion of Variance Explained: \n');
+fprintf('   LS        Constrained LS \n');
+disp([originalVarExp,constrainedVarExp]);
+
+% check that Lbeta = 0
+fprintf('Check constraint on regression L*beta: \n');
+disp(L*constrainedB);
+
+% make new plot
+figure;
+plot(x,y,'k*');xlabel('X');ylabel('Y');
+title('Polynomial Regression Models');
+h = legend('Data','Location','Southeast');
+hold on;
+a = linspace(-3,3,1000); % p was defined above
+newleg = h.String;
+hornerFun = myHorner(myB);
+plot(a,hornerFun(a));
+newleg{end+1} = 'Least-Squares';
+legend(newleg);
+
+hornerFun = myHorner(constrainedB);
+plot(a,hornerFun(a));
+newleg{end+1} = 'Constrained Least-Squares';
+legend(newleg);
+##### SOURCE END #####
+--></body></html>

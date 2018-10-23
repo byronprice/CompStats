@@ -1,0 +1,225 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Project3_Question2.m</title><meta name="generator" content="MATLAB 9.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-10-22"><meta name="DC.source" content="Project3_Question2.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Project3_Question2.m</h1><!--introduction--><pre>code to see results from Project 3, Question 2
+code to run EM algorithm is attached as a MATLAB function</pre><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Generate fake data to test algorithm, based on generative changepoint mixture model</a></li><li><a href="#2">Simulated Data Results</a></li><li><a href="#3">Load Nile dataset, fit changepoint mixture model with EM algorithm, Problem 2-D</a></li><li><a href="#4">Actual Nile River Data Results</a></li></ul></div><h2 id="1">Generate fake data to test algorithm, based on generative changepoint mixture model</h2><pre class="codeinput"><span class="comment">% simulate changepoint data, Gaussian mixture</span>
+years = 1871:1970;
+N = length(years);
+Z = unidrnd(N-1,[1,1]);
+mu1 = 1100;
+mu2 = 800;
+sigsquare = 100^2;
+
+X = zeros(N,1);
+X(1:Z) = normrnd(mu1,sqrt(sigsquare),[Z,1]);
+X(Z+1:N) = normrnd(mu2,sqrt(sigsquare),[N-Z,1]);
+
+figure;
+plot(years,X,<span class="string">'.'</span>);title(<span class="string">'Simulated Nile River Data'</span>);
+xlabel(<span class="string">'Year'</span>);ylabel(<span class="string">'Flow (100 million m^3)'</span>);
+
+fprintf(<span class="string">'Changepoint at Year %d\n'</span>,years(Z));
+fprintf(<span class="string">'Mu before changepoint: %3.2f\n'</span>,mu1);
+fprintf(<span class="string">'Mu after changepoint: %3.2f\n'</span>,mu2);
+fprintf(<span class="string">'Process Standard Deviation: %3.2f\n\n'</span>,sqrt(sigsquare));
+
+<span class="comment">% run EM algorithm to estimate parameters from simulated data</span>
+
+[mu1est,mu2est,sigsquareEst,Zest] = GaussChangepointEM(X);
+
+fprintf(<span class="string">'Estimated changepoint at Year %d\n'</span>,years(round(Zest)));
+fprintf(<span class="string">'Estimated Mu before changepoint: %3.2f\n'</span>,mu1est);
+fprintf(<span class="string">'Estimated Mu after changepoint: %3.2f\n'</span>,mu2est);
+fprintf(<span class="string">'Estimated Process Standard Deviation: %3.2f\n\n'</span>,sqrt(sigsquareEst));
+
+figure;plot(years,X,<span class="string">'.'</span>);title(<span class="string">'Simulated Nile River Data with Estimated Model'</span>);
+xlabel(<span class="string">'Year'</span>);ylabel(<span class="string">'Flow (100 million m^3)'</span>);
+
+stdev = sqrt(sigsquareEst);
+hold <span class="string">on</span>;boundedline(years(1:Zest),mu1est.*ones(Zest,1),stdev.*ones(Zest,1),<span class="string">'c'</span>,<span class="string">'alpha'</span>);
+boundedline(years(Zest+1:N),mu2est.*ones(N-Zest,1),stdev.*ones(N-Zest,1),<span class="string">'m'</span>,<span class="string">'alpha'</span>);
+</pre><pre class="codeoutput">Changepoint at Year 1933
+Mu before changepoint: 1100.00
+Mu after changepoint: 800.00
+Process Standard Deviation: 100.00
+
+Estimated changepoint at Year 1933
+Estimated Mu before changepoint: 1106.56
+Estimated Mu after changepoint: 761.88
+Estimated Process Standard Deviation: 106.66
+
+</pre><img vspace="5" hspace="5" src="Project3_Question2_01.png" alt=""> <img vspace="5" hspace="5" src="Project3_Question2_02.png" alt=""> <h2 id="2">Simulated Data Results</h2><p>This algorithm works very well, correctly picking out the year of the changepoint and also accurately estimating the means and variance.</p><h2 id="3">Load Nile dataset, fit changepoint mixture model with EM algorithm, Problem 2-D</h2><pre class="codeinput">data = csvread(<span class="string">'Nile.dat'</span>,1);
+years = 1871:1970;
+N = length(years);
+
+[mu1est,mu2est,sigsquareEst,Zest,piEst] = GaussChangepointEM(data);
+
+fprintf(<span class="string">'Parameter Inferences for Nile River Dataset\n'</span>);
+fprintf(<span class="string">'Estimated changepoint at Year %d\n'</span>,years(round(Zest)));
+fprintf(<span class="string">'Estimated Mu before changepoint: %3.2f\n'</span>,mu1est);
+fprintf(<span class="string">'Estimated Mu after changepoint: %3.2f\n'</span>,mu2est);
+fprintf(<span class="string">'Estimated Process Variance: %3.2f\n'</span>,sigsquareEst);
+
+figure;plot(years,piEst);
+title(<span class="string">'Nile River Data Changepoint Probability'</span>);
+xlabel(<span class="string">'Year'</span>);ylabel(<span class="string">'Probability of Being Changepoint'</span>);
+
+figure;plot(years,data,<span class="string">'.'</span>);title(<span class="string">'Nile River Data with Estimated Model'</span>);
+xlabel(<span class="string">'Year'</span>);ylabel(<span class="string">'Flow (100 million m^3)'</span>);
+
+stdev = sqrt(sigsquareEst);
+hold <span class="string">on</span>;boundedline(years(1:Zest),mu1est.*ones(Zest,1),stdev.*ones(Zest,1),<span class="string">'c'</span>,<span class="string">'alpha'</span>);
+boundedline(years(Zest+1:N),mu2est.*ones(N-Zest,1),stdev.*ones(N-Zest,1),<span class="string">'m'</span>,<span class="string">'alpha'</span>);
+</pre><pre class="codeoutput">Parameter Inferences for Nile River Dataset
+Estimated changepoint at Year 1898
+Estimated Mu before changepoint: 1097.29
+Estimated Mu after changepoint: 850.72
+Estimated Process Variance: 16140.28
+</pre><img vspace="5" hspace="5" src="Project3_Question2_03.png" alt=""> <img vspace="5" hspace="5" src="Project3_Question2_04.png" alt=""> <h2 id="4">Actual Nile River Data Results</h2><p>The algorithm predicts a changepoint occurred in the year 1898. The mean flow from 1871 to 1898 was estimated to be 1097.29 * 100 million cubic meters. The mean flow from 1899 to 1970 was estimated to be 850.72 * 100 million cubic meters, a drop of about 25,000 million cubic meters. The year-to-year variability (standard deviation) in flow was estimated to be 127.04 * 100 million cubic meters. What happened to the Nile?</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Project3_Question2.m
+%  code to see results from Project 3, Question 2
+%  code to run EM algorithm is attached as a MATLAB function
+
+%% Generate fake data to test algorithm, based on generative changepoint mixture model
+
+% simulate changepoint data, Gaussian mixture
+years = 1871:1970;
+N = length(years);
+Z = unidrnd(N-1,[1,1]);
+mu1 = 1100;
+mu2 = 800;
+sigsquare = 100^2;
+
+X = zeros(N,1);
+X(1:Z) = normrnd(mu1,sqrt(sigsquare),[Z,1]);
+X(Z+1:N) = normrnd(mu2,sqrt(sigsquare),[N-Z,1]);
+
+figure;
+plot(years,X,'.');title('Simulated Nile River Data');
+xlabel('Year');ylabel('Flow (100 million m^3)');
+
+fprintf('Changepoint at Year %d\n',years(Z));
+fprintf('Mu before changepoint: %3.2f\n',mu1);
+fprintf('Mu after changepoint: %3.2f\n',mu2);
+fprintf('Process Standard Deviation: %3.2f\n\n',sqrt(sigsquare));
+
+% run EM algorithm to estimate parameters from simulated data
+
+[mu1est,mu2est,sigsquareEst,Zest] = GaussChangepointEM(X);
+
+fprintf('Estimated changepoint at Year %d\n',years(round(Zest)));
+fprintf('Estimated Mu before changepoint: %3.2f\n',mu1est);
+fprintf('Estimated Mu after changepoint: %3.2f\n',mu2est);
+fprintf('Estimated Process Standard Deviation: %3.2f\n\n',sqrt(sigsquareEst));
+
+figure;plot(years,X,'.');title('Simulated Nile River Data with Estimated Model');
+xlabel('Year');ylabel('Flow (100 million m^3)');
+
+stdev = sqrt(sigsquareEst);
+hold on;boundedline(years(1:Zest),mu1est.*ones(Zest,1),stdev.*ones(Zest,1),'c','alpha');
+boundedline(years(Zest+1:N),mu2est.*ones(N-Zest,1),stdev.*ones(N-Zest,1),'m','alpha');
+
+%% Simulated Data Results
+% This algorithm works very well, correctly picking out the year of the
+% changepoint and also accurately estimating the means and variance.
+
+%% Load Nile dataset, fit changepoint mixture model with EM algorithm, Problem 2-D
+data = csvread('Nile.dat',1);
+years = 1871:1970;
+N = length(years);
+
+[mu1est,mu2est,sigsquareEst,Zest,piEst] = GaussChangepointEM(data);
+
+fprintf('Parameter Inferences for Nile River Dataset\n');
+fprintf('Estimated changepoint at Year %d\n',years(round(Zest)));
+fprintf('Estimated Mu before changepoint: %3.2f\n',mu1est);
+fprintf('Estimated Mu after changepoint: %3.2f\n',mu2est);
+fprintf('Estimated Process Variance: %3.2f\n',sigsquareEst);
+
+figure;plot(years,piEst);
+title('Nile River Data Changepoint Probability');
+xlabel('Year');ylabel('Probability of Being Changepoint');
+
+figure;plot(years,data,'.');title('Nile River Data with Estimated Model');
+xlabel('Year');ylabel('Flow (100 million m^3)');
+
+stdev = sqrt(sigsquareEst);
+hold on;boundedline(years(1:Zest),mu1est.*ones(Zest,1),stdev.*ones(Zest,1),'c','alpha');
+boundedline(years(Zest+1:N),mu2est.*ones(N-Zest,1),stdev.*ones(N-Zest,1),'m','alpha');
+
+%% Actual Nile River Data Results
+% The algorithm predicts a changepoint occurred in the year 1898. The mean
+% flow from 1871 to 1898 was estimated to be 1097.29 * 100 million cubic
+% meters. The mean flow from 1899 to 1970 was estimated to be 850.72 * 100
+% million cubic meters, a drop of about 25,000 million cubic meters. The
+% year-to-year variability (standard deviation) in flow was estimated to be 
+% 127.04 * 100 million cubic meters. What happened to the Nile?
+
+##### SOURCE END #####
+--></body></html>
