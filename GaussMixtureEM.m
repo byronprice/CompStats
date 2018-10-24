@@ -34,13 +34,13 @@ logData = log(data); % uses complex numbers if data less than zero
 piParam = (1./K).*ones(K,1);
 
 % split data in quadrants
-Q = quantile(data,linspace(0,1,K+1));
+Q = quantile(data(:,1),linspace(0,1,K+1));
 
 mu = cell(K,1);
 sigma = cell(K,1);
 
 for ii=1:K
-   currentData = data(data(:,1)>=Q(ii,1) & data(:,1)<Q(ii+1,1),:);
+   currentData = data(data(:,1)>=Q(1,ii) & data(:,1)<Q(1,ii+1),:);
    mu{ii} = mean(currentData)';
    sigma{ii} = cov(currentData);
 end
