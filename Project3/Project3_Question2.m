@@ -27,7 +27,7 @@ fprintf('Process Standard Deviation: %3.2f\n\n',sqrt(sigsquare));
 
 % run EM algorithm to estimate parameters from simulated data
 
-[mu1est,mu2est,sigsquareEst,Zest] = GaussChangepointEM(X);
+[mu1est,mu2est,sigsquareEst,Zest] = GaussChangepointEMV2(X);
 
 fprintf('Estimated changepoint at Year %d\n',years(round(Zest)));
 fprintf('Estimated Mu before changepoint: %3.2f\n',mu1est);
@@ -50,7 +50,7 @@ data = csvread('Nile.dat',1);
 years = 1871:1970;
 N = length(years);
 
-[mu1est,mu2est,sigsquareEst,Zest,piEst] = GaussChangepointEM(data);
+[mu1est,mu2est,sigsquareEst,Zest,piEst] = GaussChangepointEMV2(data);
 
 fprintf('Parameter Inferences for Nile River Dataset\n');
 fprintf('Estimated changepoint at Year %d\n',years(round(Zest)));
@@ -58,7 +58,7 @@ fprintf('Estimated Mu before changepoint: %3.2f\n',mu1est);
 fprintf('Estimated Mu after changepoint: %3.2f\n',mu2est);
 fprintf('Estimated Process Variance: %3.2f\n',sigsquareEst);
 
-figure;plot(years,piEst);
+figure;plot(years(1:end-1),piEst);
 title('Nile River Data Changepoint Probability');
 xlabel('Year');ylabel('Probability of Being Changepoint');
 
