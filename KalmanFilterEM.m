@@ -40,10 +40,10 @@ data = data';
 
 % initialize parameters
 % generate random covariance matrix for hidden state space noise process
-Q = [1,0.1,-0.2;0.1,2,0.4;-0.2,0.4,3];
+Q = [1,0.1,-0.2;0.1,1,0.4;-0.2,0.4,1];
 
 % estimate of observation noise covariance
-R = [2,-0.3,0.4;-0.3,0.5,0.1;0.4,0.1,1.5];
+R = [1,-0.3,0.4;-0.3,1,0.1;0.4,0.1,1];
 
 % could add this as a way to transform x to y, here we assume identity
 % C = eye(d);
