@@ -27,15 +27,10 @@ x = zeros(N,d);
 zeroVec = zeros(1,d);
 
 % generate random covariance matrix for hidden state space noise process
-Q = randn(d,d);
-Q = Q'*Q;
+Q = [1,0.1,-0.2;0.1,2,0.4;-0.2,0.4,3];
 
 % generate random covariance matrix for observation noise
-R = randn(d,d);
-R = R'*R;
-
-% identity for transformation from hidden state space to observed space
-C = eye(d);
+R = [2,-0.3,0.4;-0.3,0.5,0.1;0.4,0.1,1.5];
 
 % generate transformation matrix for vector autoregressive process
 A = randn(d,d);

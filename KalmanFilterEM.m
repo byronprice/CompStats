@@ -1,4 +1,4 @@
-function [A,Q,R] = KalmanFilterEM(data)
+function [A,Q,R,x] = KalmanFilterEM(data)
 %KalmanFilterEM.m
 %   Fit latent variable (state-space) model for Kalman filter parameters
 %    using the EM algorithm. Data is assumed to be driven by an underlying
@@ -17,6 +17,7 @@ function [A,Q,R] = KalmanFilterEM(data)
 %        space x
 %       Q - covariance of the state space stochastic process
 %       R - covariance of the observation space process
+%       x - estimates of the hidden states, N-by-d
 %
 %Created: 2018/10/23
 % By: Byron Price
@@ -29,62 +30,79 @@ function [A,Q,R] = KalmanFilterEM(data)
 % check size of data
 [N,d] = size(data);
 
-dataMean = mean(data,2);
+dataMean = mean(data,1);
 
 data = data-dataMean;
 
-sigma = cov(data);
+data = data';
+
+% sigma = cov(data');
 
 % initialize parameters
 % generate random covariance matrix for hidden state space noise process
-Q = randn(d,d);
-Q = Q'*Q;
+Q = [1,0.1,-0.2;0.1,2,0.4;-0.2,0.4,3];
 
 % estimate of observation noise covariance
-R = cov(data);
+R = [2,-0.3,0.4;-0.3,0.5,0.1;0.4,0.1,1.5];
 
 % could add this as a way to transform x to y, here we assume identity
 % C = eye(d);
 
 % generate transformation matrix for vector autoregressive process
-A = randn(d,d);
-A = A./sum(A(:));
+tmp1 = zeros(d,d);
+tmp2 = zeros(d,d);
+for ii=2:N
+    tmp1 = tmp1+data(:,ii-1)*data(:,ii)';
+    tmp2 = tmp2+data(:,ii-1)*data(:,ii-1)';
+end
+A = (tmp2\tmp1)';
 
-I = eye(d);
-
-Pt1 = eye(d);
-Pt = A*Pt1*A'+Q;
-
-K = (Pt+R)\Pt;
-
-PtLag1 = (I-K)*A*Pt;
-
-x = zeros(size(data));
-
-x(2:end,:) = (A*x(1:end-1,:)')';
-
-x(2:end,:) = x(2:end,:)+(K*(data(2:end,:)'-x(2:end,:)'))';
+x = zeros(d,N+1);
 
 maxIter = 1e3;
-tolerance = 1e-6;
+tolerance = 1e-4;
 for tt=1:maxIter
-    % calculate D, E, F
-    D = zeros(d,d);E = zeros(d,d);F = zeros(d,d);
-    for ii=1:N
-        
+    % E step, get expected hidden state estimates
+    Rinv = R;
+    Qinv = Q;
+    for ii=1:d
+        Rinv = SWEEP(Rinv,ii); % inverse of R and Q now saved
+        Qinv = SWEEP(Qinv,ii);
+    end
+%     x(:,1) = mvnrnd(zeros(d,1),Q)';
+    for ii=2:N+1
+        x(:,ii) = (Rinv+Qinv)\(Rinv*data(:,ii-1)+Qinv*A*x(:,ii-1));
     end
     
-    
-    totalPrecision = 0;
-    for ii=1:K
-       totalPrecision = totalPrecision+sum(abs(muStar{ii}-mu{ii}));
-       totalPrecision = totalPrecision+sum(sum(abs(sigmaStar{ii}-sigma{ii})));
+    % M step, maximize expected log-likelihood
+    tmp1 = zeros(size(A));
+    tmp2 = zeros(size(A));
+    for ii=2:N+1
+        tmp1 = tmp1+x(:,ii-1)*x(:,ii)';
+        tmp2 = tmp2+x(:,ii-1)*x(:,ii-1)';
     end
-    if totalPrecision<=tolerance
+    Ahat = (tmp2\tmp1)';
+    Qhat = zeros(size(Q));
+    Rhat = zeros(size(R));
+    
+    for ii=2:N+1
+        Qhat = Qhat+(x(:,ii)-Ahat*x(:,ii-1))*(x(:,ii)-Ahat*x(:,ii-1))';
+        Rhat = Rhat+(data(:,ii-1)-x(:,ii))*(data(:,ii-1)-x(:,ii))';
+    end
+    Qhat = Qhat./N;
+    Rhat = Rhat./N;
+    
+    
+    totalPrecision = abs(A-Ahat)+abs(Q-Qhat)+abs(R-Rhat);
+    if sum(totalPrecision(:))<=tolerance
         break;
     end
-
+    A = Ahat;
+    Q = Qhat;
+    R = Rhat;
 end
+
+x = x(:,2:end)'+dataMean;
 end
 
 function [X] = SWEEP(X,k)
