@@ -70,6 +70,7 @@ for tt=1:maxIter
         Qinv = SWEEP(Qinv,ii);
     end
 %     x(:,1) = mvnrnd(zeros(d,1),Q)';
+    x(:,1) = A\x(:,2);
     for ii=2:N+1
         x(:,ii) = (Rinv+Qinv)\(Rinv*data(:,ii-1)+Qinv*A*x(:,ii-1));
     end

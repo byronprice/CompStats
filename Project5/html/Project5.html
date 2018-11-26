@@ -1,0 +1,529 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Project5</title><meta name="generator" content="MATLAB 9.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-11-26"><meta name="DC.source" content="Project5.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Problem 1 - Hidden Markov Model</a></li><li><a href="#3">Problem 1 - Results</a></li><li><a href="#4">Problem 2 - Gibbs Sampler</a></li><li><a href="#5">Problem 2 - Results</a></li></ul></div><pre class="codeinput"><span class="comment">% Project5.m</span>
+<span class="comment">% Code to illustrate problems from Project 5 for the MA 589 Computational</span>
+<span class="comment">%  Statistics course.</span>
+</pre><h2 id="2">Problem 1 - Hidden Markov Model</h2><p>Find the MAP estimate for the most probable sequence of hidden states under a hidden Markov model</p><pre class="codeinput"><span class="comment">% model given by information in project description</span>
+P = [0.5,0.5,0;0.05,0.9,0.05;0,0.5,0.5]; <span class="comment">% transition probabilities</span>
+EmissionDist = [-1,0.7^2;0,0.5^2;1,0.7^2]; <span class="comment">% emissions for each state, normal distribution</span>
+start = 2;
+N = 200;
+numStates = size(P,1);
+
+<span class="comment">% simulate from this HMM, see how well Viterbi algorithm recovers sequence</span>
+<span class="comment">% of hidden states</span>
+[hiddenStates,emissions] = SimulateHMM(P,EmissionDist,N,start);
+[~,mapStates] = ViterbiHMM(P,EmissionDist,start,emissions);
+
+accuracy = mean(hiddenStates==mapStates);
+fprintf(<span class="string">'Simulated Data: \n'</span>);
+fprintf(<span class="string">'HMM Viterbi Algorithm Accuracy: %3.2f\n\n'</span>,accuracy);
+
+stateMeans = zeros(N,1);
+trueStateMeans = zeros(N,1);
+<span class="keyword">for</span> ii=1:N
+    stateMeans(ii) = EmissionDist(mapStates(ii),1);
+    trueStateMeans(ii) = EmissionDist(hiddenStates(ii),1);
+<span class="keyword">end</span>
+figure;plot(emissions,<span class="string">'m.'</span>,<span class="string">'LineWidth'</span>,4);hold <span class="string">on</span>;plot(trueStateMeans,<span class="string">'m'</span>,<span class="string">'LineWidth'</span>,2);
+plot(stateMeans,<span class="string">'c'</span>,<span class="string">'LineWidth'</span>,2);
+title(<span class="string">'HMM Estimation with Simulated Data'</span>);xlabel(<span class="string">'Time Step'</span>);ylabel(<span class="string">'Emission'</span>);
+legend(<span class="string">'Emission'</span>,<span class="string">'True State'</span>,<span class="string">'MAP State'</span>);
+
+<span class="comment">% real data</span>
+fprintf(<span class="string">'Comparative Genomic Hybridization Assay Data: \n'</span>);
+data = csvread(<span class="string">'cgh.csv'</span>,1);
+emissions = data(:,2);
+
+<span class="comment">% use forwrd algorithm to compute log(P(Y))</span>
+[logProbData,logAlpha] = ForwardHMM(P,EmissionDist,start,emissions);
+
+fprintf(<span class="string">'Log Probability of the Data: %3.2f\n'</span>,logProbData);
+
+<span class="comment">% use Viterbi to get MAP estimate for sequence of hidden states X-hat</span>
+[logProbPath,mapStates] = ViterbiHMM(P,EmissionDist,start,emissions);
+
+fprintf(<span class="string">'Log Probability of the MAP sequence of states, given the data: %3.2f\n'</span>,logProbPath);
+
+stateNames = {<span class="string">'Deleted'</span>,<span class="string">'Normal'</span>,<span class="string">'Duplicated'</span>};
+<span class="keyword">for</span> ii=1:numStates
+    meanVal = mean(emissions(mapStates==ii));
+    fprintf(<span class="string">'Mean log ratio of the copy number for %s state: %3.2f\n'</span>,stateNames{ii},meanVal);
+<span class="keyword">end</span>
+stateMeans = zeros(N,1);
+<span class="keyword">for</span> ii=1:N
+    stateMeans(ii) = EmissionDist(mapStates(ii),1);
+<span class="keyword">end</span>
+figure;plot(emissions,<span class="string">'m.'</span>,<span class="string">'LineWidth'</span>,4);hold <span class="string">on</span>;
+plot(stateMeans,<span class="string">'c'</span>,<span class="string">'LineWidth'</span>,2);
+title(<span class="string">'HMM Estimation, Comparative Genomic Hybridization'</span>);xlabel(<span class="string">'Time Step'</span>);
+ylabel(<span class="string">'Emission'</span>);legend(<span class="string">'Emission'</span>,<span class="string">'MAP State'</span>);
+
+<span class="comment">% probabilities for last probe</span>
+tmp = logAlpha(end,:);
+lastProbeNormal = exp(tmp(2)-LogSum(tmp,numStates));
+
+fprintf(<span class="string">'Probability last probe has normal copy number: %3.2f\n'</span>,lastProbeNormal);
+
+tmp = logAlpha(end,:);
+deletedDuplicated = exp(tmp(1)-tmp(3));
+
+fprintf(<span class="string">'%3.2f times more likely last probe in deleted than duplicated region\n'</span>,deletedDuplicated);
+</pre><pre class="codeoutput">Simulated Data: 
+HMM Viterbi Algorithm Accuracy: 0.90
+
+Comparative Genomic Hybridization Assay Data: 
+Log Probability of the Data: -196.43
+Log Probability of the MAP sequence of states, given the data: -213.04
+Mean log ratio of the copy number for Deleted state: -1.12
+Mean log ratio of the copy number for Normal state: 0.04
+Mean log ratio of the copy number for Duplicated state: 1.36
+Probability last probe has normal copy number: 0.96
+0.32 times more likely last probe in deleted than duplicated region
+</pre><img vspace="5" hspace="5" src="Project5_01.png" alt=""> <img vspace="5" hspace="5" src="Project5_02.png" alt=""> <h2 id="3">Problem 1 - Results</h2><pre class="language-matlab">The <span class="string">Viterbi</span> <span class="string">algorithm</span> <span class="string">accurately</span> <span class="string">recovers</span> <span class="string">the</span> <span class="string">sequence</span> <span class="string">of</span> <span class="string">hidden</span> <span class="string">states</span>
+<span class="keyword">for</span> the simulated <span class="string">data</span>, achieving <span class="string">~90</span><span class="comment">% accuracy. It does tend to miss</span>
+brief <span class="string">jumps</span> <span class="string">into</span> <span class="string">the</span> <span class="string">"deleted"</span> <span class="string">and</span> <span class="string">"duplicated"</span> <span class="string">states.</span> <span class="string">By</span> <span class="string">comparison</span>, randomly
+guessing <span class="string">achieves</span> <span class="string">about</span> <span class="string">72</span><span class="comment">% accuracy, while choosing for each hidden</span>
+state <span class="string">the</span> <span class="string">maximum</span> <span class="string">probability</span> <span class="string">from</span> <span class="string">the</span> <span class="string">forward</span> <span class="string">algorithm</span> <span class="string">(the most likely</span>
+state, given <span class="string">the</span> <span class="string">observations) achieves ~88</span><span class="comment">% accuracy.</span>
+On <span class="string">the</span> <span class="string">actual</span> <span class="string">comparative</span> <span class="string">genomic</span> <span class="string">hybridization</span> <span class="string">assay</span> <span class="string">data</span>, we <span class="string">see</span>
+from <span class="string">the</span> <span class="string">plot</span> <span class="string">that</span> <span class="string">the</span> <span class="string">model</span> <span class="string">provides</span> <span class="string">a</span> <span class="string">good</span> <span class="string">fit</span> <span class="string">to</span> <span class="string">the</span> <span class="string">data.</span> <span class="string">However</span>, it
+does <span class="string">seem</span> <span class="string">like</span> <span class="string">this</span> <span class="string">data</span> <span class="string">differs</span> <span class="string">from</span> <span class="string">simulations</span> <span class="string">of</span> <span class="string">this</span> <span class="string">model.</span> <span class="string">There</span> <span class="string">are</span> <span class="string">two</span>
+notable <span class="string">differences:</span> <span class="string">1) the actual data seems to stay in the two less</span>
+prevalent <span class="string">states</span> <span class="string">(deleted or duplicated)</span> <span class="string">for</span> <span class="string">longer</span> <span class="string">than</span> <span class="string">the</span> <span class="string">model</span>
+predicts, e.g. the probability <span class="string">of</span> <span class="string">staying</span> <span class="string">in</span> <span class="string">the</span> <span class="string">deleted</span> <span class="string">state</span>, given
+that <span class="string">you</span> <span class="string">are</span> <span class="string">already</span> <span class="string">in</span> <span class="string">the</span> <span class="string">deleted</span> <span class="string">state</span>, seems <span class="string">to</span> <span class="string">be</span> <span class="string">higher</span> <span class="string">than</span> <span class="string">0.5</span> <span class="string">in</span>
+the <span class="string">data</span>; and <span class="string">2) the mean of the duplicated state may be higher than the</span>
+model's +1. We <span class="string">see</span> <span class="string">that</span> <span class="string">the</span> <span class="string">emissions</span> <span class="string">(log ratio of the copy number)</span> <span class="string">in</span>
+the <span class="string">duplicated</span> <span class="string">state</span> <span class="string">have</span> <span class="string">a</span> <span class="string">mean</span> <span class="string">of</span> <span class="string">1.36</span> <span class="string">and</span> <span class="string">that</span> <span class="string">most</span> <span class="string">of</span> <span class="string">the</span> <span class="string">emissions</span>
+in <span class="string">this</span> <span class="string">state</span> <span class="string">are</span> <span class="string">greater</span> <span class="string">than</span> <span class="string">1.</span> <span class="string">Perhaps</span>, <span class="keyword">for</span> the duplicated <span class="string">state</span>, the
+emission <span class="string">distribution</span> <span class="string">is</span> <span class="string">not</span> <span class="string">normally-distributed</span> <span class="string">around</span> <span class="string">1.</span>
+</pre><h2 id="4">Problem 2 - Gibbs Sampler</h2><p>Use a hybrid Gibbs sampler / MCMC technique to fit a model for human genomic data.</p><pre class="codeinput">tmp = csvread(<span class="string">'hla_study.csv'</span>,1);
+
+Y = tmp(:,1);
+X = tmp(:,2:end);
+p = size(X,2);
+N = size(Y,1);
+
+genomePos = csvread(<span class="string">'hla_snps.csv'</span>,1,1);
+
+G = zeros(p,p);
+
+<span class="keyword">for</span> ii=1:p
+    <span class="keyword">for</span> jj=1:p
+        <span class="keyword">if</span> ii==jj
+            G(ii,jj) = 0;
+        <span class="keyword">else</span>
+            difference = abs(genomePos(ii)-genomePos(jj));
+            G(ii,jj) = difference&lt;50000;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+[beta0,beta,theta,posterior] = MCMCGeneticModel(Y,X,G);
+
+fprintf(<span class="string">'Posterior Mean Estimates: \n'</span>);
+fprintf(<span class="string">'Beta0: %3.2f\n\n'</span>,mean(beta0,2));
+fprintf(<span class="string">'Marker   Beta    Theta\n'</span>);
+<span class="keyword">for</span> ii=1:p
+    fprintf(<span class="string">'%2.0f      %4.2f      %4.2f\n'</span>,ii,mean(beta(ii,:),2),mean(theta(ii,:),2));
+<span class="keyword">end</span>
+fprintf(<span class="string">'\n'</span>);
+figure;subplot(2,1,1);
+autocorr(posterior);title(<span class="string">'Log-Posterior Autocorrelation'</span>);
+subplot(2,1,2);
+plot(posterior);xlabel(<span class="string">'Sample'</span>);ylabel(<span class="string">'Log Posterior'</span>);
+title(<span class="string">'Gibbs-MCMC Log Posterior'</span>);
+
+figure;
+<span class="keyword">for</span> ii=1:p
+    subplot(4,3,ii);histogram(beta(ii,:));
+    xlabel(<span class="string">'Value'</span>);ylabel(<span class="string">'Count'</span>);
+    title(sprintf(<span class="string">'Beta-%d'</span>,ii));
+<span class="keyword">end</span>
+
+figure;
+<span class="keyword">for</span> ii=1:p
+    subplot(4,3,ii);autocorr(beta(ii,:));
+    ylabel(<span class="string">''</span>);
+    title(sprintf(<span class="string">'Beta-%d Autocorr'</span>,ii));
+<span class="keyword">end</span>
+
+figure;
+<span class="keyword">for</span> ii=1:p
+    subplot(4,3,ii);histogram(theta(ii,:));
+    xlabel(<span class="string">'Value'</span>);ylabel(<span class="string">'Count'</span>);
+    title(sprintf(<span class="string">'Theta-%d'</span>,ii));
+<span class="keyword">end</span>
+
+figure;
+<span class="keyword">for</span> ii=1:p
+    subplot(4,3,ii);autocorr(theta(ii,:));
+    ylabel(<span class="string">''</span>);
+    title(sprintf(<span class="string">'Theta-%d Autocorr'</span>,ii));
+<span class="keyword">end</span>
+
+<span class="comment">% compare several chains</span>
+M = 10;
+Variance = zeros(M,3);Estimate = zeros(M,3);
+<span class="keyword">for</span> ii=1:10
+    [beta0,beta,theta,posterior] = MCMCGeneticModel(Y,X,G);
+    Estimate(ii,1) = mean(beta0);
+    Estimate(ii,2) = mean(beta(5,:));
+    Estimate(ii,3) = mean(posterior);
+
+    Variance(ii,1) = var(beta0);
+    Variance(ii,2) = var(beta(5,:));
+    Variance(ii,3) = var(posterior);
+<span class="keyword">end</span>
+
+names = {<span class="string">'Beta0'</span>,<span class="string">'Beta-5'</span>,<span class="string">'Posterior'</span>};
+<span class="keyword">for</span> jj=1:3
+    W = mean(Variance(:,jj));
+    B = var(Estimate(:,jj));
+    R = (((N-1)/N)*W+B)/W;
+    fprintf(<span class="string">'Scale Reduction Factor for %s: %3.2f\n'</span>,names{jj},R);
+<span class="keyword">end</span>
+
+<span class="comment">% effective sample sizes</span>
+fprintf(<span class="string">'\nEffective Sample Sizes (ESS): \n'</span>);
+avals = autocorr(beta0,500);
+ESS = length(beta0)/(1+2*sum(avals));
+fprintf(<span class="string">'ESS for %d MCMC Samples of Beta0: %3.1f\n'</span>,length(beta0),ESS);
+
+avals = autocorr(beta(1,:),500);
+ESS = length(beta(1,:))/(1+2*sum(avals));
+fprintf(<span class="string">'ESS for %d MCMC Samples of Beta-1: %3.1f\n'</span>,length(beta(1,:)),ESS);
+
+avals = autocorr(beta(5,:),500);
+ESS = length(beta(7,:))/(1+2*sum(avals));
+fprintf(<span class="string">'ESS for %d MCMC Samples of Beta-5: %3.1f\n'</span>,length(beta(5,:)),ESS);
+</pre><pre class="codeoutput">Posterior Mean Estimates: 
+Beta0: -1.07
+
+Marker   Beta    Theta
+ 1      0.00      0.00
+ 2      -0.00      0.00
+ 3      0.00      0.00
+ 4      0.00      0.00
+ 5      2.26      1.00
+ 6      -0.00      0.00
+ 7      0.00      0.00
+ 8      -0.00      0.00
+ 9      0.00      0.00
+10      0.00      0.00
+11      -0.00      0.00
+
+Scale Reduction Factor for Beta0: 0.99
+Scale Reduction Factor for Beta-5: 0.99
+Scale Reduction Factor for Posterior: 0.99
+
+Effective Sample Sizes (ESS): 
+ESS for 10000 MCMC Samples of Beta0: 629.9
+ESS for 10000 MCMC Samples of Beta-1: 668.6
+ESS for 10000 MCMC Samples of Beta-5: 615.6
+</pre><img vspace="5" hspace="5" src="Project5_03.png" alt=""> <img vspace="5" hspace="5" src="Project5_04.png" alt=""> <img vspace="5" hspace="5" src="Project5_05.png" alt=""> <img vspace="5" hspace="5" src="Project5_06.png" alt=""> <img vspace="5" hspace="5" src="Project5_07.png" alt=""> <h2 id="5">Problem 2 - Results</h2><pre>The results show that only marker number 5 (identifier: rs3819299)
+significantly associates with disease status. All of the MCMC samples for
+theta are zero for all of the markers, except for marker 5. We see from
+the autocorrelations and the trace of the log posterior that the hybrid
+Gibbs-MCMC sampler mixes fairly well, with autocorrelations decaying to 0
+by about 10-20 lags. The effective sample sizes show a similar result,
+with values of about 500 for 10,000 samples. This means, we have an
+effective sample size ratio of 1 in 20. If we wanted 1,000 IID samples
+from the posterior, we would need to generate 20,000 samples from the
+sampler. The scale reduction factors are all ~1, which shows that the
+sampler generates similar distributions each time it runs.
+Changing the hyperparameters h and T does not dramatically alter the
+result. For h = -1000, we have the exact same result, and for h=-1, every
+marker now has a mean value for theta greater than 0, but only markers
+3, 4, 5, 7, 9, and 10 seem have to values for beta that are different from 0.
+However, marker 5 still has a theta value equal to 1 and the highest
+magnitude for its beta value.</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% Project5.m
+% Code to illustrate problems from Project 5 for the MA 589 Computational
+%  Statistics course.
+
+%% Problem 1 - Hidden Markov Model
+% Find the MAP estimate for the most probable sequence of hidden states
+% under a hidden Markov model
+
+% model given by information in project description
+P = [0.5,0.5,0;0.05,0.9,0.05;0,0.5,0.5]; % transition probabilities
+EmissionDist = [-1,0.7^2;0,0.5^2;1,0.7^2]; % emissions for each state, normal distribution
+start = 2;
+N = 200;
+numStates = size(P,1);
+
+% simulate from this HMM, see how well Viterbi algorithm recovers sequence
+% of hidden states
+[hiddenStates,emissions] = SimulateHMM(P,EmissionDist,N,start);
+[~,mapStates] = ViterbiHMM(P,EmissionDist,start,emissions);
+
+accuracy = mean(hiddenStates==mapStates);
+fprintf('Simulated Data: \n');
+fprintf('HMM Viterbi Algorithm Accuracy: %3.2f\n\n',accuracy);
+
+stateMeans = zeros(N,1);
+trueStateMeans = zeros(N,1);
+for ii=1:N
+    stateMeans(ii) = EmissionDist(mapStates(ii),1);
+    trueStateMeans(ii) = EmissionDist(hiddenStates(ii),1);
+end
+figure;plot(emissions,'m.','LineWidth',4);hold on;plot(trueStateMeans,'m','LineWidth',2);
+plot(stateMeans,'c','LineWidth',2);
+title('HMM Estimation with Simulated Data');xlabel('Time Step');ylabel('Emission');
+legend('Emission','True State','MAP State');
+
+% real data
+fprintf('Comparative Genomic Hybridization Assay Data: \n');
+data = csvread('cgh.csv',1);
+emissions = data(:,2);
+
+% use forwrd algorithm to compute log(P(Y))
+[logProbData,logAlpha] = ForwardHMM(P,EmissionDist,start,emissions);
+
+fprintf('Log Probability of the Data: %3.2f\n',logProbData);
+
+% use Viterbi to get MAP estimate for sequence of hidden states X-hat
+[logProbPath,mapStates] = ViterbiHMM(P,EmissionDist,start,emissions);
+
+fprintf('Log Probability of the MAP sequence of states, given the data: %3.2f\n',logProbPath);
+
+stateNames = {'Deleted','Normal','Duplicated'};
+for ii=1:numStates
+    meanVal = mean(emissions(mapStates==ii));
+    fprintf('Mean log ratio of the copy number for %s state: %3.2f\n',stateNames{ii},meanVal);
+end
+stateMeans = zeros(N,1);
+for ii=1:N
+    stateMeans(ii) = EmissionDist(mapStates(ii),1);
+end
+figure;plot(emissions,'m.','LineWidth',4);hold on;
+plot(stateMeans,'c','LineWidth',2);
+title('HMM Estimation, Comparative Genomic Hybridization');xlabel('Time Step');
+ylabel('Emission');legend('Emission','MAP State');
+
+% probabilities for last probe
+tmp = logAlpha(end,:);
+lastProbeNormal = exp(tmp(2)-LogSum(tmp,numStates));
+
+fprintf('Probability last probe has normal copy number: %3.2f\n',lastProbeNormal);
+
+tmp = logAlpha(end,:);
+deletedDuplicated = exp(tmp(1)-tmp(3));
+
+fprintf('%3.2f times more likely last probe in deleted than duplicated region\n',deletedDuplicated);
+
+
+%% Problem 1 - Results
+%   The Viterbi algorithm accurately recovers the sequence of hidden states
+% for the simulated data, achieving ~90% accuracy. It does tend to miss
+% brief jumps into the "deleted" and "duplicated" states. By comparison, randomly
+% guessing achieves about 72% accuracy, while choosing for each hidden
+% state the maximum probability from the forward algorithm (the most likely
+% state, given the observations) achieves ~88% accuracy. 
+%   On the actual comparative genomic hybridization assay data, we see 
+% from the plot that the model provides a good fit to the data. However, it
+% does seem like this data differs from simulations of this model. There are two
+% notable differences: 1) the actual data seems to stay in the two less
+% prevalent states (deleted or duplicated) for longer than the model
+% predicts, e.g. the probability of staying in the deleted state, given
+% that you are already in the deleted state, seems to be higher than 0.5 in
+% the data; and 2) the mean of the duplicated state may be higher than the
+% model's +1. We see that the emissions (log ratio of the copy number) in
+% the duplicated state have a mean of 1.36 and that most of the emissions
+% in this state are greater than 1. Perhaps, for the duplicated state, the
+% emission distribution is not normally-distributed around 1. 
+
+%% Problem 2 - Gibbs Sampler
+% Use a hybrid Gibbs sampler / MCMC technique to fit a model for human
+% genomic data. 
+
+tmp = csvread('hla_study.csv',1);
+
+Y = tmp(:,1);
+X = tmp(:,2:end);
+p = size(X,2);
+N = size(Y,1);
+
+genomePos = csvread('hla_snps.csv',1,1);
+
+G = zeros(p,p);
+
+for ii=1:p
+    for jj=1:p
+        if ii==jj
+            G(ii,jj) = 0;
+        else
+            difference = abs(genomePos(ii)-genomePos(jj));
+            G(ii,jj) = difference<50000;
+        end
+    end
+end
+
+[beta0,beta,theta,posterior] = MCMCGeneticModel(Y,X,G);
+
+fprintf('Posterior Mean Estimates: \n');
+fprintf('Beta0: %3.2f\n\n',mean(beta0,2));
+fprintf('Marker   Beta    Theta\n');
+for ii=1:p
+    fprintf('%2.0f      %4.2f      %4.2f\n',ii,mean(beta(ii,:),2),mean(theta(ii,:),2));
+end
+fprintf('\n');
+figure;subplot(2,1,1);
+autocorr(posterior);title('Log-Posterior Autocorrelation');
+subplot(2,1,2);
+plot(posterior);xlabel('Sample');ylabel('Log Posterior');
+title('Gibbs-MCMC Log Posterior');
+
+figure;
+for ii=1:p
+    subplot(4,3,ii);histogram(beta(ii,:));
+    xlabel('Value');ylabel('Count');
+    title(sprintf('Beta-%d',ii));
+end
+
+figure;
+for ii=1:p
+    subplot(4,3,ii);autocorr(beta(ii,:));
+    ylabel('');
+    title(sprintf('Beta-%d Autocorr',ii));
+end
+
+figure;
+for ii=1:p
+    subplot(4,3,ii);histogram(theta(ii,:));
+    xlabel('Value');ylabel('Count');
+    title(sprintf('Theta-%d',ii));
+end
+
+figure;
+for ii=1:p
+    subplot(4,3,ii);autocorr(theta(ii,:));
+    ylabel('');
+    title(sprintf('Theta-%d Autocorr',ii));
+end
+
+% compare several chains
+M = 10;
+Variance = zeros(M,3);Estimate = zeros(M,3);
+for ii=1:10
+    [beta0,beta,theta,posterior] = MCMCGeneticModel(Y,X,G);
+    Estimate(ii,1) = mean(beta0);
+    Estimate(ii,2) = mean(beta(5,:));
+    Estimate(ii,3) = mean(posterior);
+    
+    Variance(ii,1) = var(beta0);
+    Variance(ii,2) = var(beta(5,:));
+    Variance(ii,3) = var(posterior);
+end
+
+names = {'Beta0','Beta-5','Posterior'};
+for jj=1:3
+    W = mean(Variance(:,jj));
+    B = var(Estimate(:,jj));
+    R = (((N-1)/N)*W+B)/W;
+    fprintf('Scale Reduction Factor for %s: %3.2f\n',names{jj},R);
+end
+
+% effective sample sizes
+fprintf('\nEffective Sample Sizes (ESS): \n');
+avals = autocorr(beta0,500);
+ESS = length(beta0)/(1+2*sum(avals));
+fprintf('ESS for %d MCMC Samples of Beta0: %3.1f\n',length(beta0),ESS);
+
+avals = autocorr(beta(1,:),500);
+ESS = length(beta(1,:))/(1+2*sum(avals));
+fprintf('ESS for %d MCMC Samples of Beta-1: %3.1f\n',length(beta(1,:)),ESS);
+
+avals = autocorr(beta(5,:),500);
+ESS = length(beta(7,:))/(1+2*sum(avals));
+fprintf('ESS for %d MCMC Samples of Beta-5: %3.1f\n',length(beta(5,:)),ESS);
+
+%% Problem 2 - Results
+%  The results show that only marker number 5 (identifier: rs3819299)
+% significantly associates with disease status. All of the MCMC samples for 
+% theta are zero for all of the markers, except for marker 5. We see from
+% the autocorrelations and the trace of the log posterior that the hybrid
+% Gibbs-MCMC sampler mixes fairly well, with autocorrelations decaying to 0
+% by about 10-20 lags. The effective sample sizes show a similar result,
+% with values of about 500 for 10,000 samples. This means, we have an
+% effective sample size ratio of 1 in 20. If we wanted 1,000 IID samples 
+% from the posterior, we would need to generate 20,000 samples from the 
+% sampler. The scale reduction factors are all ~1, which shows that the
+% sampler generates similar distributions each time it runs.
+% Changing the hyperparameters h and T does not dramatically alter the
+% result. For h = -1000, we have the exact same result, and for h=-1, every
+% marker now has a mean value for theta greater than 0, but only markers
+% 3, 4, 5, 7, 9, and 10 seem have to values for beta that are different from 0.
+% However, marker 5 still has a theta value equal to 1 and the highest
+% magnitude for its beta value.
+##### SOURCE END #####
+--></body></html>

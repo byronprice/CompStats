@@ -1,0 +1,621 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Project4</title><meta name="generator" content="MATLAB 9.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-10-31"><meta name="DC.source" content="Project4.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Problem 1 - Random Sampler (Gumbel and Truncated Exponential)</a></li><li><a href="#3">Problem 1 - Results</a></li><li><a href="#4">Problem 2 - K Categorical Distribution</a></li><li><a href="#5">Problem 2 - Results</a></li><li><a href="#6">Problem 3 - Rejection Sampling</a></li><li><a href="#7">Problem 3 - Results</a></li><li><a href="#8">Problem 4 - Random Walk</a></li><li><a href="#9">Problem 4 - Results</a></li></ul></div><pre class="codeinput"><span class="comment">% Project4.m</span>
+<span class="comment">% Code to illustrate problems from Project 4 for the MA 589 Computational</span>
+<span class="comment">%  Statistics course.</span>
+</pre><h2 id="2">Problem 1 - Random Sampler (Gumbel and Truncated Exponential)</h2><p>Draw random samples from Gumbel Distribution with one set of parameters and then from the truncated exponential distribution with two different sets of parameters</p><pre class="codeinput">samples = zeros(1000,1);
+sigma = 1;
+mu = psi(1); <span class="comment">% euler-mascheroni constant</span>
+<span class="keyword">for</span> ii=1:1000
+    Q = rand; <span class="comment">% generate uniform random number</span>
+    samples(ii) = GumbelQuantile(Q,mu,sigma); <span class="comment">% calculate inverse CDF</span>
+<span class="keyword">end</span>
+
+[F,X] = ecdf(samples); <span class="comment">% empirical CDF</span>
+
+Xtheory = GumbelQuantile(F,mu,sigma);
+
+figure;
+plot(Xtheory,X,<span class="string">'.b'</span>);hold <span class="string">on</span>;plot(Xtheory,Xtheory,<span class="string">'k'</span>);
+xlabel(<span class="string">'Theoretical Quantiles'</span>);ylabel(<span class="string">'Empirical Quantiles'</span>);
+title(sprintf(<span class="string">'QQ Plot for Gumbel Random Sampler (%3.1f,%3.1f)'</span>,mu,sigma));
+
+<span class="comment">% Truncated Exponential Distribution</span>
+samples = zeros(1000,1);
+lambda = 1;a = 0.5;b = 1.5;
+<span class="keyword">for</span> ii=1:1000
+    Q = rand; <span class="comment">% generate uniform random number</span>
+    samples(ii) = TruncExpQuantile(Q,lambda,a,b); <span class="comment">% calculate inverse CDF</span>
+<span class="keyword">end</span>
+
+[F,X] = ecdf(samples); <span class="comment">% empirical CDF</span>
+
+Xtheory = TruncExpQuantile(F,lambda,a,b);
+
+figure;
+plot(Xtheory,X,<span class="string">'.b'</span>);hold <span class="string">on</span>;plot(Xtheory,Xtheory,<span class="string">'k'</span>);
+xlabel(<span class="string">'Theoretical Quantiles'</span>);ylabel(<span class="string">'Empirical Quantiles'</span>);
+title(sprintf(<span class="string">'QQ Plot for Truncated Exp Random Sampler (%3.1f,%3.1f,%3.1f)'</span>,lambda,a,b));
+
+<span class="comment">% repeat for new parameters</span>
+samples = zeros(1000,1);
+lambda = 2;a = 1.5;b = Inf;
+<span class="keyword">for</span> ii=1:1000
+    Q = rand; <span class="comment">% generate uniform random number</span>
+    samples(ii) = TruncExpQuantile(Q,lambda,a,b); <span class="comment">% calculate inverse CDF</span>
+<span class="keyword">end</span>
+
+[F,X] = ecdf(samples); <span class="comment">% empirical CDF</span>
+
+Xtheory = TruncExpQuantile(F,lambda,a,b);
+
+figure;
+plot(Xtheory,X,<span class="string">'.b'</span>);hold <span class="string">on</span>;plot(Xtheory,Xtheory,<span class="string">'k'</span>);
+xlabel(<span class="string">'Theoretical Quantiles'</span>);ylabel(<span class="string">'Empirical Quantiles'</span>);
+title(sprintf(<span class="string">'QQ Plot for Truncated Exp Random Sampler (%3.1f,%3.1f,%3.1f)'</span>,lambda,a,b));
+</pre><img vspace="5" hspace="5" src="Project4_01.png" alt=""> <img vspace="5" hspace="5" src="Project4_02.png" alt=""> <img vspace="5" hspace="5" src="Project4_03.png" alt=""> <h2 id="3">Problem 1 - Results</h2><p>The random samplers work quite well, especially in the bulk of the distributions (the part of the distributions with the most probability mass). As you move to the tails of the distributions, corresponding to the upper quantiles, the random samplers do not do as well. This is because there are relatively fewer samples generated at the tails, ie we need more data to accurately estimate the CDF and inverse CDF.</p><h2 id="4">Problem 2 - K Categorical Distribution</h2><p>Draw random samples for K-Categorical distribution given weights, code in CategoricalSamples.m and GumbelCatSamples.m</p><pre class="codeinput">weights = [1,1,4,6,7,50,0.1]'; <span class="comment">% create randomized weights</span>
+K = length(weights);
+probs = weights./sum(weights);
+N = 1e4;
+
+X = CategoricalSamples(log(weights),N); <span class="comment">% draw N random samples</span>
+
+sampleProbs = zeros(size(probs));
+
+<span class="keyword">for</span> ii=1:K
+    sampleProbs(ii) = mean(X==ii);
+<span class="keyword">end</span>
+fprintf(<span class="string">'Original Categorical Distribution Sampler\n'</span>);
+fprintf(<span class="string">'Category   True Prob  Sampler Prob\n'</span>);
+disp([(1:K)',probs,sampleProbs]);
+
+<span class="comment">% draw categorical samples using Gumbel max trick</span>
+weights = [1,1,4,6,7,50,0.1]'; <span class="comment">% create randomized weights</span>
+K = length(weights);
+probs = weights./sum(weights);
+N = 1e4;
+
+X = GumbelCatSamples(log(weights),N); <span class="comment">% use Gumbel max trick, draw N samples</span>
+
+sampleProbs = zeros(size(probs));
+
+<span class="keyword">for</span> ii=1:K
+    sampleProbs(ii) = mean(X==ii);
+<span class="keyword">end</span>
+fprintf(<span class="string">'Categorical Sampler Using Gumbel Distribution\n'</span>);
+fprintf(<span class="string">'Category   True Prob  Sampler Prob\n'</span>);
+disp([(1:K)',probs,sampleProbs]);
+</pre><pre class="codeoutput">Original Categorical Distribution Sampler
+Category   True Prob  Sampler Prob
+    1.0000    0.0145    0.0139
+    2.0000    0.0145    0.0113
+    3.0000    0.0579    0.0633
+    4.0000    0.0868    0.0873
+    5.0000    0.1013    0.1065
+    6.0000    0.7236    0.7167
+    7.0000    0.0014    0.0010
+
+Categorical Sampler Using Gumbel Distribution
+Category   True Prob  Sampler Prob
+    1.0000    0.0145    0.0146
+    2.0000    0.0145    0.0147
+    3.0000    0.0579    0.0606
+    4.0000    0.0868    0.0894
+    5.0000    0.1013    0.1002
+    6.0000    0.7236    0.7191
+    7.0000    0.0014    0.0014
+
+</pre><h2 id="5">Problem 2 - Results</h2><p>Both random samplers work quite well, with the samples accurately representing the underlying categorical probabilities in both cases.</p><h2 id="6">Problem 3 - Rejection Sampling</h2><p>Notes describe the sampling procedure. Code is contained in RejectionSampler.m</p><pre class="codeinput">N = 1000;
+samples = RejectionSampler(N); <span class="comment">% generate 1000 random samples</span>
+
+[F,X] = ecdf(samples); <span class="comment">% empirical CDF</span>
+
+Xtheory = norminv(F,0,1); <span class="comment">% get quantiles for standard normal</span>
+
+figure;
+plot(Xtheory,X,<span class="string">'.b'</span>);hold <span class="string">on</span>;plot(Xtheory,Xtheory,<span class="string">'k'</span>);
+xlabel(<span class="string">'Theoretical Quantiles'</span>);ylabel(<span class="string">'Empirical Quantiles'</span>);
+title(<span class="string">'QQ Plot for Standard Normal Rejection Sampler'</span>);
+
+[h,p] = kstest(samples);
+
+fprintf(<span class="string">'KS Test for Standard Normal, p-value: %3.2f\n\n'</span>,p);
+</pre><pre class="codeoutput">KS Test for Standard Normal, p-value: 0.74
+
+</pre><img vspace="5" hspace="5" src="Project4_04.png" alt=""> <h2 id="7">Problem 3 - Results</h2><p>The QQ plot shows a strong resemblance between the empirical quantiles and the theoretical quantiles. In addition, the one-sample KS test against a standard normal CDF shows a p-value &gt;&gt; 0.05. The one-sample KS compares the empirical CDF of the randomly-generated samples against the theoretical CDF of a standard normal distribution, with the null hypothesis that the data (samples) come from a standard normal. With p&gt;&gt;0.05, the test fails to reject the null. The samples are, at least, very close to approximating a standard normal distribution.</p><h2 id="8">Problem 4 - Random Walk</h2><p>This problem looks at a random walk in 1 dimension and estimates different expectations ... code in RandomWalkMC.m</p><pre class="codeinput"><span class="comment">% A) run random walk, get probability of landing at 0 and 20</span>
+N = 1e5;
+stopPosition = zeros(N,1);
+walkLen = zeros(N,1);
+
+p = 0.5;
+<span class="keyword">for</span> ii=1:N
+    [stopPosition(ii),walkLen(ii)] = RandomWalkMC(p);
+<span class="keyword">end</span>
+
+stopCons = [0,20];
+fprintf(<span class="string">'MC Estimates of Random Walk\n\n'</span>);
+fprintf(<span class="string">'P0 = Probability of ending at 0 (PC)\n'</span>);
+fprintf(<span class="string">'P20 = Probability of ending at 20 (BP)\n\n'</span>);
+fprintf(<span class="string">'MC Estimate of P0: %3.3f\n'</span>,mean(stopPosition==stopCons(1)));
+fprintf(<span class="string">'MC Estimate of P20: %3.3f\n\n'</span>,mean(stopPosition==stopCons(2)));
+
+<span class="comment">% get bootstrap estimate of 95% confidence interval</span>
+bootN = 1000;
+bootstrapEst = zeros(bootN,2);
+
+<span class="keyword">for</span> ii=1:bootN
+    inds = unidrnd(N,[N,1]);
+    resample = stopPosition(inds);
+    bootstrapEst(ii,1) = mean(resample==stopCons(1));
+    bootstrapEst(ii,2) = mean(resample==stopCons(2));
+<span class="keyword">end</span>
+
+alpha = 0.05;
+Q = quantile(bootstrapEst(:,1),[alpha/2,1-alpha/2]);
+fprintf(<span class="string">'MC Bootstrap 95%% confidence interval on P0: [%3.4f , %3.4f]\n'</span>,Q(1),Q(2));
+Q = quantile(bootstrapEst(:,2),[alpha/2,1-alpha/2]);
+fprintf(<span class="string">'MC Bootstrap 95%% confidence interval on P20: [%3.4f , %3.4f]\n\n'</span>,Q(1),Q(2));
+
+MCstdev = std(bootstrapEst(:,2));
+
+<span class="comment">% B) check the walk-length distribution</span>
+
+<span class="comment">% histogram of length of walk</span>
+figure;histogram(walkLen,<span class="string">'normalization'</span>,<span class="string">'probability'</span>);
+xlabel(<span class="string">'Total Walk Length (steps)'</span>);
+ylabel(<span class="string">'Probability of Occurrence'</span>);
+title(<span class="string">'Walk-Length Histogram'</span>);
+
+fprintf(<span class="string">'P200steps = Probability of taking more than 200 steps\n'</span>);
+P200steps = mean(walkLen&gt;200);
+fprintf(<span class="string">'P200steps: %3.3f\n\n'</span>,P200steps);
+
+<span class="comment">% C) conditional walk-length distributions</span>
+
+<span class="comment">% histogram of length of walk, given landed at position 0</span>
+newSamples = walkLen(stopPosition==stopCons(1));
+
+figure;histogram(newSamples,<span class="string">'normalization'</span>,<span class="string">'probability'</span>);
+xlabel(<span class="string">'Total Walk Length (steps)'</span>);
+ylabel(<span class="string">'Probability of Occurrence'</span>);
+title(<span class="string">'Walk-Length Histogram, Given Stop Position was 0'</span>);
+
+<span class="comment">% histogram of length of walk, given landed at position 20</span>
+newSamples = walkLen(stopPosition==stopCons(2));
+
+figure;histogram(newSamples,<span class="string">'normalization'</span>,<span class="string">'probability'</span>);
+xlabel(<span class="string">'Total Walk Length (steps)'</span>);
+ylabel(<span class="string">'Probability of Occurrence'</span>);
+title(<span class="string">'Walk-Length Histogram, Given Stop Position was 20'</span>);
+
+<span class="comment">% D) expected number of times student will be at position 18</span>
+N = 1e5;
+stopPosition = zeros(N,1);
+walkLen = zeros(N,1);
+pass18 = zeros(N,1);
+
+p = 0.5;
+<span class="keyword">for</span> ii=1:N
+    [stopPosition(ii),walkLen(ii),pass18(ii)] = RandomWalkMC(p);
+<span class="keyword">end</span>
+
+fprintf(<span class="string">'Expected number of times walker stands at 18: %3.3f\n'</span>,mean(pass18));
+
+<span class="comment">% E) importance sampler, re-run using pq = 0.55</span>
+fprintf(<span class="string">'\nImportance Sampling Estimates\n\n'</span>);
+N = 1e5;
+stopPosition = zeros(N,1);
+walkLen = zeros(N,1);
+weight = zeros(N,1);
+
+p = 0.5;pq = 0.55;
+<span class="keyword">for</span> ii=1:N
+    [stopPosition(ii),walkLen(ii),~,weight(ii)] = RandomWalkISMC(p,pq);
+<span class="keyword">end</span>
+
+stopCons = [0,20];
+fprintf(<span class="string">'P0 = Probability of ending at 0 (PC)\n'</span>);
+fprintf(<span class="string">'P20 = Probability of ending at 20 (BP)\n\n'</span>);
+fprintf(<span class="string">'IS Estimate of P0: %3.3f\n'</span>,sum((stopPosition==stopCons(1)).*weight)/sum(weight));
+fprintf(<span class="string">'IS Estimate of P20: %3.3f\n\n'</span>,sum((stopPosition==stopCons(2)).*weight)/sum(weight));
+
+<span class="comment">% get bootstrap estimate of 95% confidence interval</span>
+bootN = 1000;
+bootstrapEst = zeros(bootN,2);
+
+<span class="keyword">for</span> ii=1:bootN
+    inds = unidrnd(N,[N,1]);
+    resample = stopPosition(inds);
+    resampleweights = weight(inds);
+    bootstrapEst(ii,1) = sum((resample==stopCons(1)).*resampleweights)/sum(resampleweights);
+    bootstrapEst(ii,2) = sum((resample==stopCons(2)).*resampleweights)/sum(resampleweights);
+<span class="keyword">end</span>
+
+alpha = 0.05;
+Q = quantile(bootstrapEst(:,1),[alpha/2,1-alpha/2]);
+fprintf(<span class="string">'IS Bootstrap 95%% confidence interval on P0: [%3.4f , %3.4f]\n'</span>,Q(1),Q(2));
+Q = quantile(bootstrapEst(:,2),[alpha/2,1-alpha/2]);
+fprintf(<span class="string">'IS Bootstrap 95%% confidence interval on P20: [%3.4f , %3.4f]\n\n'</span>,Q(1),Q(2));
+
+ISstdev = std(bootstrapEst(:,2));
+
+fprintf(<span class="string">'Ratio of Error on MC versus IS Estimates of P20: %3.3f\n'</span>,MCstdev/ISstdev);
+</pre><pre class="codeoutput">MC Estimates of Random Walk
+
+P0 = Probability of ending at 0 (PC)
+P20 = Probability of ending at 20 (BP)
+
+MC Estimate of P0: 0.951
+MC Estimate of P20: 0.049
+
+MC Bootstrap 95% confidence interval on P0: [0.9494 , 0.9522]
+MC Bootstrap 95% confidence interval on P20: [0.0478 , 0.0506]
+
+P200steps = Probability of taking more than 200 steps
+P200steps: 0.016
+
+Expected number of times walker stands at 18: 0.202
+
+Importance Sampling Estimates
+
+P0 = Probability of ending at 0 (PC)
+P20 = Probability of ending at 20 (BP)
+
+IS Estimate of P0: 0.950
+IS Estimate of P20: 0.050
+
+IS Bootstrap 95% confidence interval on P0: [0.9491 , 0.9507]
+IS Bootstrap 95% confidence interval on P20: [0.0493 , 0.0509]
+
+Ratio of Error on MC versus IS Estimates of P20: 1.660
+</pre><img vspace="5" hspace="5" src="Project4_05.png" alt=""> <img vspace="5" hspace="5" src="Project4_06.png" alt=""> <img vspace="5" hspace="5" src="Project4_07.png" alt=""> <h2 id="9">Problem 4 - Results</h2><p>The MC simulations seem to provide an accurate estimate of the different expectations for the random walk. For instance, the probability of ending the walk at position 20 is 0.05. 0.05 is 1/20, which makes intuitive sense given the configuration of the one-dimensional walking path. There are 19 spaces to get from the starting position (1) to position 20 and only 1 space to get from the starting position to position 0. With p=0.5, then 50% of the time we immediately end at position 0. 0% we end at position 0 in 2 steps, 12.5% we end at position 0 in 3 steps, and 6.25% we end at position 0 in 5 steps. The pattern gets complicated after 5 steps, and depends on all possible combinations of steps. But you can see that the final probability will depend very importantly on the starting position. If you change the starting position to position 2, then you get 0.1 or 1/10. With regards to using the importance sampler, it looks like that technique provides a significant improvement in terms of lowering the variance of the estimate of P20 (the probability that the walk ends at position 20). The ratio of the standard deviation of the MC estimate to the IS estimate was about 1.6.</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% Project4.m
+% Code to illustrate problems from Project 4 for the MA 589 Computational
+%  Statistics course.
+
+%% Problem 1 - Random Sampler (Gumbel and Truncated Exponential)
+% Draw random samples from Gumbel Distribution with one set of parameters
+% and then from the truncated exponential distribution with two different
+% sets of parameters
+
+samples = zeros(1000,1);
+sigma = 1;
+mu = psi(1); % euler-mascheroni constant
+for ii=1:1000
+    Q = rand; % generate uniform random number
+    samples(ii) = GumbelQuantile(Q,mu,sigma); % calculate inverse CDF
+end
+
+[F,X] = ecdf(samples); % empirical CDF
+
+Xtheory = GumbelQuantile(F,mu,sigma);
+
+figure;
+plot(Xtheory,X,'.b');hold on;plot(Xtheory,Xtheory,'k');
+xlabel('Theoretical Quantiles');ylabel('Empirical Quantiles');
+title(sprintf('QQ Plot for Gumbel Random Sampler (%3.1f,%3.1f)',mu,sigma));
+
+% Truncated Exponential Distribution
+samples = zeros(1000,1);
+lambda = 1;a = 0.5;b = 1.5;
+for ii=1:1000
+    Q = rand; % generate uniform random number
+    samples(ii) = TruncExpQuantile(Q,lambda,a,b); % calculate inverse CDF
+end
+
+[F,X] = ecdf(samples); % empirical CDF
+
+Xtheory = TruncExpQuantile(F,lambda,a,b);
+
+figure;
+plot(Xtheory,X,'.b');hold on;plot(Xtheory,Xtheory,'k');
+xlabel('Theoretical Quantiles');ylabel('Empirical Quantiles');
+title(sprintf('QQ Plot for Truncated Exp Random Sampler (%3.1f,%3.1f,%3.1f)',lambda,a,b));
+
+% repeat for new parameters
+samples = zeros(1000,1);
+lambda = 2;a = 1.5;b = Inf;
+for ii=1:1000
+    Q = rand; % generate uniform random number
+    samples(ii) = TruncExpQuantile(Q,lambda,a,b); % calculate inverse CDF
+end
+
+[F,X] = ecdf(samples); % empirical CDF
+
+Xtheory = TruncExpQuantile(F,lambda,a,b);
+
+figure;
+plot(Xtheory,X,'.b');hold on;plot(Xtheory,Xtheory,'k');
+xlabel('Theoretical Quantiles');ylabel('Empirical Quantiles');
+title(sprintf('QQ Plot for Truncated Exp Random Sampler (%3.1f,%3.1f,%3.1f)',lambda,a,b));
+
+%% Problem 1 - Results
+% The random samplers work quite well, especially in the bulk of the
+% distributions (the part of the distributions with the most probability
+% mass). As you move to the tails of the distributions, corresponding to
+% the upper quantiles, the random samplers do not do as well. This is
+% because there are relatively fewer samples generated at the tails, ie we
+% need more data to accurately estimate the CDF and inverse CDF.
+
+%% Problem 2 - K Categorical Distribution
+% Draw random samples for K-Categorical distribution given weights, code in
+% CategoricalSamples.m and GumbelCatSamples.m
+
+weights = [1,1,4,6,7,50,0.1]'; % create randomized weights
+K = length(weights);
+probs = weights./sum(weights);
+N = 1e4;
+
+X = CategoricalSamples(log(weights),N); % draw N random samples
+
+sampleProbs = zeros(size(probs));
+
+for ii=1:K
+    sampleProbs(ii) = mean(X==ii);
+end
+fprintf('Original Categorical Distribution Sampler\n');
+fprintf('Category   True Prob  Sampler Prob\n');
+disp([(1:K)',probs,sampleProbs]);
+
+% draw categorical samples using Gumbel max trick
+weights = [1,1,4,6,7,50,0.1]'; % create randomized weights
+K = length(weights);
+probs = weights./sum(weights);
+N = 1e4;
+
+X = GumbelCatSamples(log(weights),N); % use Gumbel max trick, draw N samples
+
+sampleProbs = zeros(size(probs));
+
+for ii=1:K
+    sampleProbs(ii) = mean(X==ii);
+end
+fprintf('Categorical Sampler Using Gumbel Distribution\n');
+fprintf('Category   True Prob  Sampler Prob\n');
+disp([(1:K)',probs,sampleProbs]);
+
+%% Problem 2 - Results
+% Both random samplers work quite well, with the samples accurately
+% representing the underlying categorical probabilities in both cases. 
+
+%% Problem 3 - Rejection Sampling
+% Notes describe the sampling procedure. Code is contained in
+% RejectionSampler.m
+
+N = 1000;
+samples = RejectionSampler(N); % generate 1000 random samples
+
+[F,X] = ecdf(samples); % empirical CDF
+
+Xtheory = norminv(F,0,1); % get quantiles for standard normal
+
+figure;
+plot(Xtheory,X,'.b');hold on;plot(Xtheory,Xtheory,'k');
+xlabel('Theoretical Quantiles');ylabel('Empirical Quantiles');
+title('QQ Plot for Standard Normal Rejection Sampler');
+
+[h,p] = kstest(samples);
+
+fprintf('KS Test for Standard Normal, p-value: %3.2f\n\n',p);
+
+%% Problem 3 - Results
+% The QQ plot shows a strong resemblance between the empirical quantiles
+% and the theoretical quantiles. In addition, the one-sample KS test
+% against a standard normal CDF shows a p-value >> 0.05. The one-sample KS
+% compares the empirical CDF of the randomly-generated samples against the
+% theoretical CDF of a standard normal distribution, with the null
+% hypothesis that the data (samples) come from a standard normal. With
+% p>>0.05, the test fails to reject the null. The samples are, at least,
+% very close to approximating a standard normal distribution.
+
+%% Problem 4 - Random Walk
+% This problem looks at a random walk in 1 dimension and estimates different
+% expectations ... code in RandomWalkMC.m
+
+% A) run random walk, get probability of landing at 0 and 20
+N = 1e5;
+stopPosition = zeros(N,1);
+walkLen = zeros(N,1);
+
+p = 0.5;
+for ii=1:N
+    [stopPosition(ii),walkLen(ii)] = RandomWalkMC(p);
+end
+
+stopCons = [0,20];
+fprintf('MC Estimates of Random Walk\n\n');
+fprintf('P0 = Probability of ending at 0 (PC)\n');
+fprintf('P20 = Probability of ending at 20 (BP)\n\n');
+fprintf('MC Estimate of P0: %3.3f\n',mean(stopPosition==stopCons(1)));
+fprintf('MC Estimate of P20: %3.3f\n\n',mean(stopPosition==stopCons(2)));
+
+% get bootstrap estimate of 95% confidence interval
+bootN = 1000;
+bootstrapEst = zeros(bootN,2);
+
+for ii=1:bootN
+    inds = unidrnd(N,[N,1]);
+    resample = stopPosition(inds);
+    bootstrapEst(ii,1) = mean(resample==stopCons(1));
+    bootstrapEst(ii,2) = mean(resample==stopCons(2));
+end
+
+alpha = 0.05;
+Q = quantile(bootstrapEst(:,1),[alpha/2,1-alpha/2]);
+fprintf('MC Bootstrap 95%% confidence interval on P0: [%3.4f , %3.4f]\n',Q(1),Q(2));
+Q = quantile(bootstrapEst(:,2),[alpha/2,1-alpha/2]);
+fprintf('MC Bootstrap 95%% confidence interval on P20: [%3.4f , %3.4f]\n\n',Q(1),Q(2));
+
+MCstdev = std(bootstrapEst(:,2));
+
+% B) check the walk-length distribution
+
+% histogram of length of walk
+figure;histogram(walkLen,'normalization','probability');
+xlabel('Total Walk Length (steps)');
+ylabel('Probability of Occurrence');
+title('Walk-Length Histogram');
+
+fprintf('P200steps = Probability of taking more than 200 steps\n');
+P200steps = mean(walkLen>200);
+fprintf('P200steps: %3.3f\n\n',P200steps);
+
+% C) conditional walk-length distributions
+
+% histogram of length of walk, given landed at position 0
+newSamples = walkLen(stopPosition==stopCons(1));
+
+figure;histogram(newSamples,'normalization','probability');
+xlabel('Total Walk Length (steps)');
+ylabel('Probability of Occurrence');
+title('Walk-Length Histogram, Given Stop Position was 0');
+
+% histogram of length of walk, given landed at position 20
+newSamples = walkLen(stopPosition==stopCons(2));
+
+figure;histogram(newSamples,'normalization','probability');
+xlabel('Total Walk Length (steps)');
+ylabel('Probability of Occurrence');
+title('Walk-Length Histogram, Given Stop Position was 20');
+
+% D) expected number of times student will be at position 18
+N = 1e5;
+stopPosition = zeros(N,1);
+walkLen = zeros(N,1);
+pass18 = zeros(N,1);
+
+p = 0.5;
+for ii=1:N
+    [stopPosition(ii),walkLen(ii),pass18(ii)] = RandomWalkMC(p);
+end
+
+fprintf('Expected number of times walker stands at 18: %3.3f\n',mean(pass18));
+
+% E) importance sampler, re-run using pq = 0.55
+fprintf('\nImportance Sampling Estimates\n\n');
+N = 1e5;
+stopPosition = zeros(N,1);
+walkLen = zeros(N,1);
+weight = zeros(N,1);
+
+p = 0.5;pq = 0.55;
+for ii=1:N
+    [stopPosition(ii),walkLen(ii),~,weight(ii)] = RandomWalkISMC(p,pq);
+end
+
+stopCons = [0,20];
+fprintf('P0 = Probability of ending at 0 (PC)\n');
+fprintf('P20 = Probability of ending at 20 (BP)\n\n');
+fprintf('IS Estimate of P0: %3.3f\n',sum((stopPosition==stopCons(1)).*weight)/sum(weight));
+fprintf('IS Estimate of P20: %3.3f\n\n',sum((stopPosition==stopCons(2)).*weight)/sum(weight));
+
+% get bootstrap estimate of 95% confidence interval
+bootN = 1000;
+bootstrapEst = zeros(bootN,2);
+
+for ii=1:bootN
+    inds = unidrnd(N,[N,1]);
+    resample = stopPosition(inds);
+    resampleweights = weight(inds);
+    bootstrapEst(ii,1) = sum((resample==stopCons(1)).*resampleweights)/sum(resampleweights);
+    bootstrapEst(ii,2) = sum((resample==stopCons(2)).*resampleweights)/sum(resampleweights);
+end
+
+alpha = 0.05;
+Q = quantile(bootstrapEst(:,1),[alpha/2,1-alpha/2]);
+fprintf('IS Bootstrap 95%% confidence interval on P0: [%3.4f , %3.4f]\n',Q(1),Q(2));
+Q = quantile(bootstrapEst(:,2),[alpha/2,1-alpha/2]);
+fprintf('IS Bootstrap 95%% confidence interval on P20: [%3.4f , %3.4f]\n\n',Q(1),Q(2));
+
+ISstdev = std(bootstrapEst(:,2));
+
+fprintf('Ratio of Error on MC versus IS Estimates of P20: %3.3f\n',MCstdev/ISstdev);
+
+%% Problem 4 - Results
+% The MC simulations seem to provide an accurate estimate of the different
+% expectations for the random walk. For instance, the probability of
+% ending the walk at position 20 is 0.05. 0.05 is 1/20, which makes
+% intuitive sense given the configuration of the one-dimensional walking
+% path. There are 19 spaces to get from the starting position (1) to position
+% 20 and only 1 space to get from the starting position to position 0. With 
+% p=0.5, then 50% of the time we immediately end at position 0. 0% we end at 
+% position 0 in 2 steps, 12.5% we end at position 0 in 3 steps, and 6.25% 
+% we end at position 0 in 5 steps. The pattern gets complicated after 5
+% steps, and depends on all possible combinations of steps. But you can see
+% that the final probability will depend very importantly on the starting
+% position. If you change the starting position to position 2, then 
+% you get 0.1 or 1/10. With regards to using the importance sampler, it
+% looks like that technique provides a significant improvement in terms of
+% lowering the variance of the estimate of P20 (the probability that the
+% walk ends at position 20). The ratio of the standard deviation of the MC
+% estimate to the IS estimate was about 1.6. 
+
+##### SOURCE END #####
+--></body></html>
