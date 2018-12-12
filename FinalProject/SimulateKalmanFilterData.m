@@ -38,8 +38,11 @@ Gamma = [1,0.1,-0.2;0.1,1,0.4;-0.2,0.4,1]./5;
 Sigma = [1,-0.3,0.4;-0.3,1,0.1;0.4,0.1,1];
 
 % generate transformation matrix for vector autoregressive process
-A = randn(d,d);
-A = A./sum(abs(A(:)));
+% A = randn(d,d);
+% A = A./sum(abs(A(:)));
+
+A = [1,-0.3,0.4;-0.3,1,0.1;0.4,0.1,1];
+A = A./sum(abs(A));
 
 C = eye(d);
 % A(d,1) = 0;
