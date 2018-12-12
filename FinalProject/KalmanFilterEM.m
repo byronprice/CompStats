@@ -1,4 +1,4 @@
-function [A,C,Gamma,Sigma,z,mu0,V0] = KalmanFilterEM(data)
+function [A,C,Gamma,Sigma,z,mu0,V0] = KalmanFilterEM(data,heldOutData)
 %KalmanFilterEM.m
 %   Fit latent variable (state-space) model for Kalman filter parameters
 %    using the EM algorithm. Data is assumed to be driven by an underlying
@@ -10,8 +10,12 @@ function [A,C,Gamma,Sigma,z,mu0,V0] = KalmanFilterEM(data)
 %          this process drives the observed data process,y, by
 %          x-(t) = C*z-(t)+nu
 %          where nu ~ N(0,Sigma)
-%INPUT: data - observed data, input as a matrix, d-by-N, where N is the
-%        number of observations and d is the dimensionality of each observation
+%INPUT: data - observed data, input as a matrix d-by-N, where N is the
+%        number of observations in the chain and d is the dimensionality 
+%        of each observation
+%  OPTIONAL
+%       heldOutData - observed data, d-by-M, which is held-out for
+%         cross-validation purposes, to avoid overfitting
 %OUTPUTS:
 %       A - auto-regressive(1) process transformation matrix, for the state
 %        space z
@@ -25,7 +29,13 @@ function [A,C,Gamma,Sigma,z,mu0,V0] = KalmanFilterEM(data)
 %Created: 2018/12/11
 % By: Byron Price
 
-% check size of data
+if nargin==1
+    heldOut = false;
+else
+    heldOut = true;
+    [~,M] = size(heldOutData);
+end
+
 [d,N] = size(data);
 
 % initialize parameters
@@ -66,6 +76,13 @@ prevLikelihood = -1e10;
 for tt=1:maxIter
     % E step, get expected hidden state estimates
     [mu_n,V_n,c_n,P_n] = KalmanForwardAlgo(data,A,C,Gamma,Sigma,mu0,V0,N,d);
+
+    if heldOut==true
+        [~,~,c_n_heldout,~] = KalmanForwardAlgo(heldOutData,A,C,Gamma,Sigma,mu0,V0,M,d);
+        currentLikelihood = sum(c_n_heldout);
+    else
+        currentLikelihood = sum(c_n);
+    end
     [muhat_n,Vhat_n,J_n] = KalmanBackwardAlgo(A,mu_n,V_n,P_n,N);
     
     Ez = zeros(d,N);
@@ -122,13 +139,12 @@ for tt=1:maxIter
     end
     Sigma = (1/N)*tmp;
     
-    currentLikelihood = sum(c_n);
     if currentLikelihood-prevLikelihood<=tolerance
         break;
     else
         prevLikelihood = currentLikelihood;
     end
-%     plot(tt,currentLikelihood,'.');hold on;pause(1/100);
+    plot(tt,currentLikelihood,'.');hold on;pause(1/100);
 end
 
 z = Ez;

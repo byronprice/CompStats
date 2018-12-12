@@ -171,8 +171,9 @@ legend('Azimuth','Altitude');
 
 % run EM algorithm with about 24,000 frames
 data = [pupilDiameter';pupilRotation'];
-data = data(:,1:5000); % use subset of data for these purposes
-[Ahat,Chat,Gammahat,Sigmahat,zhat,mu0hat,V0hat] = KalmanFilterEM(data);
+tmpdata = data(:,1:5000); % use subset of data for these purposes
+heldoutdata = data(:,end-5000:end);
+[Ahat,Chat,Gammahat,Sigmahat,zhat,mu0hat,V0hat] = KalmanFilterEM(tmpdata,heldoutdata);
 
 estData = Chat*zhat;
 
