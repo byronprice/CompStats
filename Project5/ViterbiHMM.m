@@ -52,7 +52,8 @@ for ii=2:N
     end
 end
 [val,ind] = max(V(end,:));
-logProbPath = val;
+[logProbData,~] = ForwardHMM(P,EmissionDist,start,emission);
+logProbPath = val-logProbData;
 
 % backtrace
 states = zeros(N,1);
