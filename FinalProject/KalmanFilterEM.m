@@ -166,11 +166,12 @@ K = (V0*C')/gaussCov;
 mu_n{1} = mu0+K*(x(:,1)-gaussMean);
 V_n{1} = (I-K*C)*V0;
 
-sigmaInv = gaussCov;sigmaDet = det(gaussCov);
-for jj=1:d
-    sigmaInv = SWEEP(sigmaInv,jj);
-end
-% sigmaDet = det(gaussCov);
+% sigmaInv = gaussCov;sigmaDet = det(gaussCov);
+% for jj=1:d
+%     sigmaInv = SWEEP(sigmaInv,jj);
+% end
+sigmaInv = pinv(gaussCov);
+sigmaDet = det(gaussCov);
 c_n(1) = GetLogMvnLikelihood(x(:,1),gaussMean,sigmaDet,sigmaInv);
 
 for ii=2:N
