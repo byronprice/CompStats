@@ -61,7 +61,7 @@ for ii=2:N
     tmp2 = tmp2+data(:,ii-1)*data(:,ii-1)';
 end
 A = tmp1/tmp2; 
-% A = mldivide(data(:,1:end-1)',data(:,2:end)');
+% A = mldivide(data(:,1:end-1)',data(:,2:end)')';
 
 mu0 = zeros(d,1);
 V0 = Gamma;
