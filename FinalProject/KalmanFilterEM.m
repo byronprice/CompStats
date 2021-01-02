@@ -170,9 +170,8 @@ V_n{1} = (I-K*C)*V0;
 % for jj=1:d
 %     sigmaInv = SWEEP(sigmaInv,jj);
 % end
-sigmaInv = pinv(gaussCov);
-sigmaDet = det(gaussCov);
-c_n(1) = GetLogMvnLikelihood(x(:,1),gaussMean,sigmaDet,sigmaInv);
+
+c_n(1) = GetLogMvnLikelihood(x(:,1),gaussMean,gaussCov);
 
 for ii=2:N
     P = A*V_n{ii-1}*A'+Gamma;
@@ -183,13 +182,8 @@ for ii=2:N
     mu_n{ii} = A*mu_n{ii-1}+K*(x(:,ii)-gaussMean);
     V_n{ii} = (I-K*C)*P;
     
-    sigmaInv = gaussCov;sigmaDet = det(gaussCov);
-    
-    for jj=1:d
-        sigmaInv = SWEEP(sigmaInv,jj);
-    end
 %     sigmaDet = det(gaussCov);
-    c_n(ii) = GetLogMvnLikelihood(x(:,ii),gaussMean,sigmaDet,sigmaInv);
+    c_n(ii) = GetLogMvnLikelihood(x(:,ii),gaussMean,gaussCov);
     P_n{ii-1} = P;
 end
 
@@ -197,9 +191,9 @@ P_n{N} = A*V_n{N}*A'+Gamma;
 
 end
 
-function [logPDF] = GetLogMvnLikelihood(data,mu,sigmaDet,sigmaInv)
-
-logPDF = -0.5*log(sigmaDet)-0.5*(data-mu)'*sigmaInv*(data-mu);
+function [logPDF] = GetLogMvnLikelihood(data,mu,sigma)
+logdet = 2*sum(log(diag(chol(sigma))));
+logPDF = -0.5*logdet-0.5*(data-mu)'*(sigma\(data-mu));
 %0.5*trace(gaussCov\(data-mu)*(data-mu)');
 
 end
